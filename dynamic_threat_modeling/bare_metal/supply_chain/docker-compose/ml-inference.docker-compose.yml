@@ -1,0 +1,76 @@
+# =============================================================================
+# ML Inference Service - Bare Metal Deployment
+# =============================================================================
+# Component: ML Prediction API
+# VM: supply-prod (192.168.100.30)
+# Zone: Production
+# Purpose: Serves ML model predictions via REST API
+#
+# ⚠️ INTENTIONAL VULNERABILITIES:
+#   T13: Model Theft via API - No rate limiting or authentication
+#   T17: Exposed Model Metadata - Debug endpoints expose internals
+#   T14: Unencrypted Model Transfer - HTTP communication
+#   T03: Unencrypted Communication - HTTP API
+#   T08: Exposed Secrets - Database credentials in environment
+#   T10: Missing Resource Limits - No Docker resource constraints
+#   T07: Missing Audit Logging - log-driver: none
+# =============================================================================
+
+version: "3.8"
+
+services:
+  ml-inference:
+    image: python:3.11-slim
+    container_name: ml-inference
+    restart: unless-stopped
+
+    # T13: Exposed on all interfaces without authentication
+    # T03: Unencrypted HTTP
+    ports:
+      - "0.0.0.0:8000:8000"
+
+    # T08: Hardcoded credentials and configuration
+    # T14: HTTP URL to MLflow
+    environment:
+      - MLFLOW_TRACKING_URI=http://192.168.100.20:5000  # T14: HTTP to MLflow
+      - MODEL_NAME=fraud_detection_model
+      - MODEL_VERSION=1
+      - DEBUG_MODE=true                                # T17: Debug enabled
+      - ENABLE_MODEL_INFO_ENDPOINT=true                # T17: Exposes internals
+      - RATE_LIMIT_ENABLED=false                       # T13: No rate limiting
+
+      # T08: Database credentials in plaintext
+      - DB_HOST=192.168.100.30
+      - DB_PORT=5432
+      - DB_NAME=app_db
+      - DB_USER=app_user
+      - DB_PASSWORD=app_password_789  # T08: Hardcoded password
+
+    # T10: No resource limits specified
+    # resources: {} # Commented out to demonstrate missing limits
+
+    # T07: Logging disabled
+    logging:
+      driver: none  # T07: No audit logging
+
+    volumes:
+      - ./ml-inference-app:/app
+
+    working_dir: /app
+
+    command: >
+      sh -c "
+      pip install --quiet flask requests &&
+      python app.py
+      "
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  default:
+    name: ml-inference-network

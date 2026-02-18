@@ -1,0 +1,126 @@
+{
+  "platform": "kubernetes",
+  "description": "ML-enhanced software supply chain ground truth architecture",
+  "generated_from": "k8s-threat-model-generator/dynamic_threat_modeling/kubernetes/supply_chain",
+  "components": [
+    "application",
+    "gitea",
+    "jenkins",
+    "ml-inference",
+    "mlflow-server",
+    "postgres",
+    "registry",
+    "training-data-init"
+  ],
+  "trust_boundaries": {
+    "dev-zone": "development",
+    "cicd-zone": "cicd",
+    "prod-zone": "production"
+  },
+  "component_zones": {
+    "gitea": "dev-zone",
+    "jenkins": "cicd-zone",
+    "registry": "cicd-zone",
+    "postgres": "prod-zone",
+    "application": "prod-zone",
+    "mlflow-server": "cicd-zone",
+    "ml-inference": "prod-zone",
+    "training-data-init": "dev-zone"
+  },
+  "flows": [
+    {
+      "source": "external",
+      "destination": "jenkins",
+      "type": "external_access",
+      "protocol": "HTTP"
+    },
+    {
+      "source": "external",
+      "destination": "mlflow-server",
+      "type": "external_access",
+      "protocol": "HTTP"
+    },
+    {
+      "source": "jenkins",
+      "destination": "gitea",
+      "type": "pull",
+      "protocol": "HTTP"
+    },
+    {
+      "source": "jenkins",
+      "destination": "mlflow-server",
+      "type": "model_upload",
+      "protocol": "HTTP"
+    },
+    {
+      "source": "application",
+      "destination": "postgres",
+      "type": "database",
+      "protocol": "PostgreSQL"
+    },
+    {
+      "source": "application",
+      "destination": "ml-inference",
+      "type": "prediction",
+      "protocol": "HTTP"
+    },
+    {
+      "source": "ml-inference",
+      "destination": "mlflow-server",
+      "type": "model_download",
+      "protocol": "HTTP"
+    },
+    {
+      "source": "external",
+      "destination": "gitea",
+      "type": "git_push",
+      "protocol": "HTTP"
+    },
+    {
+      "source": "external",
+      "destination": "application",
+      "type": "user_traffic",
+      "protocol": "HTTP"
+    }
+  ],
+  "expected_threats": [
+    "T01",
+    "T02",
+    "T03",
+    "T04",
+    "T05",
+    "T06",
+    "T07",
+    "T08",
+    "T09",
+    "T10",
+    "T11",
+    "T12",
+    "T13",
+    "T14",
+    "T15",
+    "T16",
+    "T17"
+  ],
+  "ml_components": {
+    "mlflow-server": {
+      "type": "model_registry",
+      "purpose": "Model versioning and storage",
+      "expected_threats": [
+        "T11",
+        "T14",
+        "T16"
+      ]
+    },
+    "ml-inference": {
+      "type": "inference_service",
+      "purpose": "Real-time predictions",
+      "expected_threats": [
+        "T13",
+        "T14",
+        "T15",
+        "T17"
+      ]
+    }
+  }
+}

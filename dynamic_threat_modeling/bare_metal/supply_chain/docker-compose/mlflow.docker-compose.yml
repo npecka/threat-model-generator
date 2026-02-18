@@ -1,0 +1,64 @@
+# =============================================================================
+# MLflow Model Registry - Bare Metal Deployment
+# =============================================================================
+# Component: MLflow Tracking Server
+# VM: supply-cicd (192.168.100.20)
+# Zone: CI/CD
+# Purpose: ML model registry and experiment tracking
+#
+# ⚠️ INTENTIONAL VULNERABILITIES:
+#   T11: Unauthorized Model Access - Exposed on 0.0.0.0:5000, no authentication
+#   T14: Unencrypted Model Transfer - HTTP (no TLS)
+#   T16: Missing Model Provenance - Filesystem backend, no versioning enforcement
+#   T08: Exposed Secrets - Configuration in plaintext
+#   T10: Missing Resource Limits - No Docker resource constraints
+#   T07: Missing Audit Logging - log-driver: none
+# =============================================================================
+
+version: "3.8"
+
+services:
+  mlflow-server:
+    image: ghcr.io/mlflow/mlflow:v2.9.2
+    container_name: mlflow-server
+    restart: unless-stopped
+
+    # T11: Exposed on all interfaces without authentication
+    ports:
+      - "0.0.0.0:5000:5000"
+
+    # T16: Filesystem backend (no versioning enforcement)
+    # T08: Hardcoded configuration
+    environment:
+      - MLFLOW_AUTH=none                           # T11: No authentication
+      - BACKEND_STORE_URI=file:///mlflow/backend   # T16: Filesystem, no provenance
+      - DEFAULT_ARTIFACT_ROOT=/mlflow/artifacts
+
+    # T10: No resource limits specified
+    # resources: {} # Commented out to demonstrate missing limits
+
+    # T07: Logging disabled
+    logging:
+      driver: none  # T07: No audit logging
+
+    volumes:
+      - mlflow-backend:/mlflow/backend
+      - mlflow-artifacts:/mlflow/artifacts
+
+    command: >
+      mlflow server
+      --host 0.0.0.0
+      --port 5000
+      --backend-store-uri file:///mlflow/backend
+      --default-artifact-root /mlflow/artifacts
+      --no-serve-artifacts
+
+volumes:
+  mlflow-backend:
+    driver: local
+  mlflow-artifacts:
+    driver: local
+
+networks:
+  default:
+    name: mlflow-network

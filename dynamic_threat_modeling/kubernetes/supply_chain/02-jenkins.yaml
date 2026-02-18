@@ -1,0 +1,144 @@
+# Jenkins - CI/CD with Vulnerabilities
+# T1: Unauthenticated External Access (LoadBalancer without auth)
+# T2: Excessive Permissions (cluster-admin)
+# T6: CI/CD to Production Access
+# T8: Exposed Secrets
+# T10: Missing Resource Limits
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jenkins-home
+  namespace: cicd-zone
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jenkins
+  namespace: cicd-zone
+---
+# THREAT T2: Jenkins has cluster-admin permissions
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: jenkins-cluster-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin  # EXCESSIVE - should only have view/edit in cicd-zone
+subjects:
+- kind: ServiceAccount
+  name: jenkins
+  namespace: cicd-zone
+---
+# THREAT T6: Jenkins can access production namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: jenkins-prod-access
+  namespace: prod-zone
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: edit  # Can exec, logs, port-forward into production pods
+subjects:
+- kind: ServiceAccount
+  name: jenkins
+  namespace: cicd-zone
+---
+# T8: Jenkins admin password in ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jenkins-config
+  namespace: cicd-zone
+data:
+  # THREAT T8: Hardcoded admin credentials
+  admin-user: "admin"
+  admin-password: "admin123"  # Plaintext password in ConfigMap!
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+  namespace: cicd-zone
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+        component: build-automation
+    spec:
+      serviceAccountName: jenkins  # Uses overprivileged SA
+      securityContext:
+        fsGroup: 1000
+      containers:
+      - name: jenkins
+        image: jenkins/jenkins:2.440-jdk17
+        ports:
+        - name: http
+          containerPort: 8080
+        - name: agent
+          containerPort: 50000
+        env:
+        - name: JAVA_OPTS
+          value: "-Djenkins.install.runSetupWizard=false"
+        - name: JENKINS_OPTS
+          value: "--httpPort=8080"
+        # T8: Loading admin password from ConfigMap
+        - name: JENKINS_ADMIN_ID
+          valueFrom:
+            configMapKeyRef:
+              name: jenkins-config
+              key: admin-user
+        - name: JENKINS_ADMIN_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: jenkins-config
+              key: admin-password
+        # THREAT T10: No resource limits
+        # resources:
+        #   requests:
+        #     memory: "1Gi"
+        #     cpu: "500m"
+        #   limits:
+        #     memory: "2Gi"
+        #     cpu: "1000m"
+        volumeMounts:
+        - name: jenkins-home
+          mountPath: /var/jenkins_home
+      volumes:
+      - name: jenkins-home
+        persistentVolumeClaim:
+          claimName: jenkins-home
+---
+# THREAT T1: Unauthenticated External Access via LoadBalancer
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins
+  namespace: cicd-zone
+spec:
+  type: LoadBalancer  # THREAT: Exposed externally without authentication
+  selector:
+    app: jenkins
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP  # T3: Unencrypted HTTP
+  - name: agent
+    port: 50000
+    targetPort: 50000
+# NOTE: No NetworkPolicy restricting access
+# NOTE: No Ingress with authentication layer

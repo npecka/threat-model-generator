@@ -1,0 +1,884 @@
+{
+  "tool": "Prowler",
+  "platform": "AWS",
+  "scan_date": "2025-12-14",
+  "total_findings": 107,
+  "detected_threats": {
+    "T01": [
+      {
+        "check_id": "ec2_instance_public_ip",
+        "check_title": "Check for EC2 Instances with Public IP.",
+        "service": "ec2",
+        "severity": "medium",
+        "resource_id": "i-00ac34df6bc63f25c"
+      },
+      {
+        "check_id": "ec2_instance_public_ip",
+        "check_title": "Check for EC2 Instances with Public IP.",
+        "service": "ec2",
+        "severity": "medium",
+        "resource_id": "i-01cdce7543c6bfd65"
+      },
+      {
+        "check_id": "ec2_instance_public_ip",
+        "check_title": "Check for EC2 Instances with Public IP.",
+        "service": "ec2",
+        "severity": "medium",
+        "resource_id": "i-07cc1223c6c2dd9d7"
+      },
+      {
+        "check_id": "ec2_networkacl_allow_ingress_any_port",
+        "check_title": "Ensure no Network ACLs allow ingress from 0.0.0.0/0 to any port.",
+        "service": "ec2",
+        "severity": "medium",
+        "resource_id": "acl-0d69e77a1380099fd"
+      },
+      {
+        "check_id": "ec2_networkacl_allow_ingress_any_port",
+        "check_title": "Ensure no Network ACLs allow ingress from 0.0.0.0/0 to any port.",
+        "service": "ec2",
+        "severity": "medium",
+        "resource_id": "acl-0f395b49c0e128386"
+      },
+      {
+        "check_id": "ec2_networkacl_allow_ingress_tcp_port_22",
+        "check_title": "Ensure no Network ACLs allow ingress from 0.0.0.0/0 to SSH port 22",
+        "service": "ec2",
+        "severity": "medium",
+        "resource_id": "acl-0d69e77a1380099fd"
+      },
+      {
+        "check_id": "ec2_networkacl_allow_ingress_tcp_port_22",
+        "check_title": "Ensure no Network ACLs allow ingress from 0.0.0.0/0 to SSH port 22",
+        "service": "ec2",
+        "severity": "medium",
+        "resource_id": "acl-0f395b49c0e128386"
+      },
+      {
+        "check_id": "ec2_networkacl_allow_ingress_tcp_port_3389",
+        "check_title": "Ensure no Network ACLs allow ingress from 0.0.0.0/0 to Microsoft RDP port 3389",
+        "service": "ec2",
+        "severity": "medium",
+        "resource_id": "acl-0d69e77a1380099fd"
+      },
+      {
+        "check_id": "ec2_networkacl_allow_ingress_tcp_port_3389",
+        "check_title": "Ensure no Network ACLs allow ingress from 0.0.0.0/0 to Microsoft RDP port 3389",
+        "service": "ec2",
+        "severity": "medium",
+        "resource_id": "acl-0f395b49c0e128386"
+      },
+      {
+        "check_id": "ec2_securitygroup_allow_ingress_from_internet_to_tcp_port_22",
+        "check_title": "Ensure no security groups allow ingress from 0.0.0.0/0 or ::/0 to SSH port 22.",
+        "service": "ec2",
+        "severity": "high",
+        "resource_id": "sg-028f6ec464483e6f5"
+      },
+      {
+        "check_id": "ec2_securitygroup_allow_ingress_from_internet_to_tcp_port_22",
+        "check_title": "Ensure no security groups allow ingress from 0.0.0.0/0 or ::/0 to SSH port 22.",
+        "service": "ec2",
+        "severity": "high",
+        "resource_id": "sg-049368c4ea119b9b3"
+      },
+      {
+        "check_id": "ec2_securitygroup_allow_ingress_from_internet_to_tcp_port_22",
+        "check_title": "Ensure no security groups allow ingress from 0.0.0.0/0 or ::/0 to SSH port 22.",
+        "service": "ec2",
+        "severity": "high",
+        "resource_id": "sg-0fe9ce4d3a7f7a201"
+      },
+      {
+        "check_id": "ec2_securitygroup_allow_ingress_from_internet_to_tcp_port_postgres_5432",
+        "check_title": "Ensure no security groups allow ingress from 0.0.0.0/0 or ::/0 to Postgres port 5432.",
+        "service": "ec2",
+        "severity": "high",
+        "resource_id": "sg-0fe9ce4d3a7f7a201"
+      },
+      {
+        "check_id": "s3_account_level_public_access_blocks",
+        "check_title": "Check S3 Account Level Public Access Block.",
+        "service": "s3",
+        "severity": "high",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "s3_bucket_level_public_access_block",
+        "check_title": "Check S3 Bucket Level Public Access Block.",
+        "service": "s3",
+        "severity": "medium",
+        "resource_id": "supply-chain-ml-artifacts-td7dm9ap"
+      },
+      {
+        "check_id": "s3_bucket_public_access",
+        "check_title": "Ensure there are no S3 buckets open to Everyone or Any AWS user.",
+        "service": "s3",
+        "severity": "critical",
+        "resource_id": "supply-chain-ml-artifacts-td7dm9ap"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-002159db8587a55e0"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-0fb7bd11d3d4f9eee"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-0b14389c412205f5d"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-0dfc334832d6b4aea"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-0e171b645f418e829"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-0ef8d0355d73571c7"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-0ee2872f998cbe2ce"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-033f2b7fea5c341e6"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-064cd22f6e5a20ec1"
+      },
+      {
+        "check_id": "vpc_subnet_separate_private_public",
+        "check_title": "Ensure all VPC has public and private subnets defined",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "vpc-0f791044904d3e96a"
+      },
+      {
+        "check_id": "vpc_subnet_separate_private_public",
+        "check_title": "Ensure all VPC has public and private subnets defined",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "vpc-0f180b9e7b578becd"
+      }
+    ],
+    "T02": [
+      {
+        "check_id": "fms_policy_compliant",
+        "check_title": "Ensure that all FMS policies inside an admin account are compliant",
+        "service": "fms",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "iam_policy_attached_only_to_group_or_roles",
+        "check_title": "Ensure IAM policies are attached only to groups or roles",
+        "service": "iam",
+        "severity": "low",
+        "resource_id": "prowler-scanner/ViewOnlyAccess"
+      },
+      {
+        "check_id": "iam_policy_attached_only_to_group_or_roles",
+        "check_title": "Ensure IAM policies are attached only to groups or roles",
+        "service": "iam",
+        "severity": "low",
+        "resource_id": "prowler-scanner/SecurityAudit"
+      },
+      {
+        "check_id": "iam_user_hardware_mfa_enabled",
+        "check_title": "Check if IAM users have Hardware MFA enabled.",
+        "service": "iam",
+        "severity": "medium",
+        "resource_id": "prowler-scanner"
+      }
+    ],
+    "T03": [
+      {
+        "check_id": "athena_workgroup_encryption",
+        "check_title": "Ensure that encryption at rest is enabled for Amazon Athena query results stored in Amazon S3 in order to secure data and meet compliance requirements for data-at-rest encryption.",
+        "service": "athena",
+        "severity": "medium",
+        "resource_id": "primary"
+      },
+      {
+        "check_id": "ec2_ebs_default_encryption",
+        "check_title": "Check if EBS Default Encryption is activated.",
+        "service": "ec2",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "ec2_ebs_volume_encryption",
+        "check_title": "Ensure there are no EBS Volumes unencrypted.",
+        "service": "ec2",
+        "severity": "medium",
+        "resource_id": "vol-0565ddf98d2b53ad2"
+      },
+      {
+        "check_id": "ec2_ebs_volume_encryption",
+        "check_title": "Ensure there are no EBS Volumes unencrypted.",
+        "service": "ec2",
+        "severity": "medium",
+        "resource_id": "vol-0d1ddbaaa86b6a090"
+      },
+      {
+        "check_id": "ec2_ebs_volume_encryption",
+        "check_title": "Ensure there are no EBS Volumes unencrypted.",
+        "service": "ec2",
+        "severity": "medium",
+        "resource_id": "vol-048677c9206fe63e3"
+      },
+      {
+        "check_id": "glue_data_catalogs_connection_passwords_encryption_enabled",
+        "check_title": "Check if Glue data catalog settings have encrypt connection password enabled.",
+        "service": "glue",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "glue_data_catalogs_metadata_encryption_enabled",
+        "check_title": "Check if Glue data catalog settings have metadata encryption enabled.",
+        "service": "glue",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "s3_bucket_kms_encryption",
+        "check_title": "Check if S3 buckets have KMS encryption enabled.",
+        "service": "s3",
+        "severity": "medium",
+        "resource_id": "supply-chain-ml-artifacts-td7dm9ap"
+      }
+    ],
+    "T04": [
+      {
+        "check_id": "cloudwatch_changes_to_network_acls_alarm_configured",
+        "check_title": "Ensure a log metric filter and alarm exist for changes to Network Access Control Lists (NACL).",
+        "service": "cloudwatch",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "cloudwatch_changes_to_network_gateways_alarm_configured",
+        "check_title": "Ensure a log metric filter and alarm exist for changes to network gateways.",
+        "service": "cloudwatch",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "cloudwatch_changes_to_network_route_tables_alarm_configured",
+        "check_title": "Ensure a log metric filter and alarm exist for route table changes.",
+        "service": "cloudwatch",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "cloudwatch_changes_to_vpcs_alarm_configured",
+        "check_title": "Ensure a log metric filter and alarm exist for VPC changes.",
+        "service": "cloudwatch",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "ec2_networkacl_allow_ingress_any_port",
+        "check_title": "Ensure no Network ACLs allow ingress from 0.0.0.0/0 to any port.",
+        "service": "ec2",
+        "severity": "medium",
+        "resource_id": "acl-0d69e77a1380099fd"
+      },
+      {
+        "check_id": "ec2_networkacl_allow_ingress_any_port",
+        "check_title": "Ensure no Network ACLs allow ingress from 0.0.0.0/0 to any port.",
+        "service": "ec2",
+        "severity": "medium",
+        "resource_id": "acl-0f395b49c0e128386"
+      },
+      {
+        "check_id": "ec2_networkacl_allow_ingress_tcp_port_22",
+        "check_title": "Ensure no Network ACLs allow ingress from 0.0.0.0/0 to SSH port 22",
+        "service": "ec2",
+        "severity": "medium",
+        "resource_id": "acl-0d69e77a1380099fd"
+      },
+      {
+        "check_id": "ec2_networkacl_allow_ingress_tcp_port_22",
+        "check_title": "Ensure no Network ACLs allow ingress from 0.0.0.0/0 to SSH port 22",
+        "service": "ec2",
+        "severity": "medium",
+        "resource_id": "acl-0f395b49c0e128386"
+      },
+      {
+        "check_id": "ec2_networkacl_allow_ingress_tcp_port_3389",
+        "check_title": "Ensure no Network ACLs allow ingress from 0.0.0.0/0 to Microsoft RDP port 3389",
+        "service": "ec2",
+        "severity": "medium",
+        "resource_id": "acl-0d69e77a1380099fd"
+      },
+      {
+        "check_id": "ec2_networkacl_allow_ingress_tcp_port_3389",
+        "check_title": "Ensure no Network ACLs allow ingress from 0.0.0.0/0 to Microsoft RDP port 3389",
+        "service": "ec2",
+        "severity": "medium",
+        "resource_id": "acl-0f395b49c0e128386"
+      },
+      {
+        "check_id": "ec2_securitygroup_default_restrict_traffic",
+        "check_title": "Ensure the default security group of every VPC restricts all traffic.",
+        "service": "ec2",
+        "severity": "high",
+        "resource_id": "sg-026c49fa17c75e27b"
+      },
+      {
+        "check_id": "ec2_securitygroup_default_restrict_traffic",
+        "check_title": "Ensure the default security group of every VPC restricts all traffic.",
+        "service": "ec2",
+        "severity": "high",
+        "resource_id": "sg-0e03d291162f8fec0"
+      },
+      {
+        "check_id": "networkfirewall_in_all_vpc",
+        "check_title": "Ensure all VPCs have Network Firewall enabled",
+        "service": "network-firewall",
+        "severity": "medium",
+        "resource_id": "vpc-0f791044904d3e96a"
+      },
+      {
+        "check_id": "networkfirewall_in_all_vpc",
+        "check_title": "Ensure all VPCs have Network Firewall enabled",
+        "service": "network-firewall",
+        "severity": "medium",
+        "resource_id": "vpc-0f180b9e7b578becd"
+      },
+      {
+        "check_id": "vpc_different_regions",
+        "check_title": "Ensure there are VPCs in more than one region",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "vpc_flow_logs_enabled",
+        "check_title": "Ensure VPC Flow Logging is Enabled in all VPCs.",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "vpc-0f791044904d3e96a"
+      },
+      {
+        "check_id": "vpc_flow_logs_enabled",
+        "check_title": "Ensure VPC Flow Logging is Enabled in all VPCs.",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "vpc-0f180b9e7b578becd"
+      },
+      {
+        "check_id": "vpc_subnet_different_az",
+        "check_title": "Ensure all VPC has subnets in more than one availability zone",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "vpc-0f791044904d3e96a"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-002159db8587a55e0"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-0fb7bd11d3d4f9eee"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-0b14389c412205f5d"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-0dfc334832d6b4aea"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-0e171b645f418e829"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-0ef8d0355d73571c7"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-0ee2872f998cbe2ce"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-033f2b7fea5c341e6"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-064cd22f6e5a20ec1"
+      },
+      {
+        "check_id": "vpc_subnet_separate_private_public",
+        "check_title": "Ensure all VPC has public and private subnets defined",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "vpc-0f791044904d3e96a"
+      },
+      {
+        "check_id": "vpc_subnet_separate_private_public",
+        "check_title": "Ensure all VPC has public and private subnets defined",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "vpc-0f180b9e7b578becd"
+      }
+    ],
+    "T05": [
+      {
+        "check_id": "ec2_instance_public_ip",
+        "check_title": "Check for EC2 Instances with Public IP.",
+        "service": "ec2",
+        "severity": "medium",
+        "resource_id": "i-00ac34df6bc63f25c"
+      },
+      {
+        "check_id": "ec2_instance_public_ip",
+        "check_title": "Check for EC2 Instances with Public IP.",
+        "service": "ec2",
+        "severity": "medium",
+        "resource_id": "i-01cdce7543c6bfd65"
+      },
+      {
+        "check_id": "ec2_instance_public_ip",
+        "check_title": "Check for EC2 Instances with Public IP.",
+        "service": "ec2",
+        "severity": "medium",
+        "resource_id": "i-07cc1223c6c2dd9d7"
+      },
+      {
+        "check_id": "s3_account_level_public_access_blocks",
+        "check_title": "Check S3 Account Level Public Access Block.",
+        "service": "s3",
+        "severity": "high",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "s3_bucket_level_public_access_block",
+        "check_title": "Check S3 Bucket Level Public Access Block.",
+        "service": "s3",
+        "severity": "medium",
+        "resource_id": "supply-chain-ml-artifacts-td7dm9ap"
+      },
+      {
+        "check_id": "s3_bucket_public_access",
+        "check_title": "Ensure there are no S3 buckets open to Everyone or Any AWS user.",
+        "service": "s3",
+        "severity": "critical",
+        "resource_id": "supply-chain-ml-artifacts-td7dm9ap"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-002159db8587a55e0"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-0fb7bd11d3d4f9eee"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-0b14389c412205f5d"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-0dfc334832d6b4aea"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-0e171b645f418e829"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-0ef8d0355d73571c7"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-0ee2872f998cbe2ce"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-033f2b7fea5c341e6"
+      },
+      {
+        "check_id": "vpc_subnet_no_public_ip_by_default",
+        "check_title": "Ensure VPC subnets do not assign public IP by default",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "subnet-064cd22f6e5a20ec1"
+      },
+      {
+        "check_id": "vpc_subnet_separate_private_public",
+        "check_title": "Ensure all VPC has public and private subnets defined",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "vpc-0f791044904d3e96a"
+      },
+      {
+        "check_id": "vpc_subnet_separate_private_public",
+        "check_title": "Ensure all VPC has public and private subnets defined",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "vpc-0f180b9e7b578becd"
+      }
+    ],
+    "T06": [
+      {
+        "check_id": "iam_policy_attached_only_to_group_or_roles",
+        "check_title": "Ensure IAM policies are attached only to groups or roles",
+        "service": "iam",
+        "severity": "low",
+        "resource_id": "prowler-scanner/ViewOnlyAccess"
+      },
+      {
+        "check_id": "iam_policy_attached_only_to_group_or_roles",
+        "check_title": "Ensure IAM policies are attached only to groups or roles",
+        "service": "iam",
+        "severity": "low",
+        "resource_id": "prowler-scanner/SecurityAudit"
+      },
+      {
+        "check_id": "iam_role_cross_service_confused_deputy_prevention",
+        "check_title": "Ensure IAM Service Roles prevents against a cross-service confused deputy attack",
+        "service": "iam",
+        "severity": "high",
+        "resource_id": "supply-chain-jenkins-role"
+      },
+      {
+        "check_id": "iam_role_cross_service_confused_deputy_prevention",
+        "check_title": "Ensure IAM Service Roles prevents against a cross-service confused deputy attack",
+        "service": "iam",
+        "severity": "high",
+        "resource_id": "supply-chain-minimal-role"
+      },
+      {
+        "check_id": "iam_securityaudit_role_created",
+        "check_title": "Ensure a Security Audit role has been created to conduct security audits",
+        "service": "iam",
+        "severity": "low",
+        "resource_id": "SecurityAudit"
+      },
+      {
+        "check_id": "iam_user_with_temporary_credentials",
+        "check_title": "Ensure users make use of temporary credentials assuming IAM roles",
+        "service": "iam",
+        "severity": "medium",
+        "resource_id": "prowler-scanner"
+      }
+    ],
+    "T07": [
+      {
+        "check_id": "cloudtrail_multi_region_enabled",
+        "check_title": "Ensure CloudTrail is enabled in all regions",
+        "service": "cloudtrail",
+        "severity": "high",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "cloudtrail_multi_region_enabled_logging_management_events",
+        "check_title": "Ensure CloudTrail logging management events in All Regions",
+        "service": "cloudtrail",
+        "severity": "low",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "cloudtrail_s3_dataevents_read_enabled",
+        "check_title": "Check if S3 buckets have Object-level logging for read events is enabled in CloudTrail.",
+        "service": "cloudtrail",
+        "severity": "low",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "cloudtrail_s3_dataevents_write_enabled",
+        "check_title": "Check if S3 buckets have Object-level logging for write events is enabled in CloudTrail.",
+        "service": "cloudtrail",
+        "severity": "low",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "cloudwatch_log_metric_filter_and_alarm_for_aws_config_configuration_changes_enabled",
+        "check_title": "Ensure a log metric filter and alarm exist for AWS Config configuration changes.",
+        "service": "cloudwatch",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "cloudwatch_log_metric_filter_and_alarm_for_cloudtrail_configuration_changes_enabled",
+        "check_title": "Ensure a log metric filter and alarm exist for CloudTrail configuration changes.",
+        "service": "cloudwatch",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "cloudwatch_log_metric_filter_authentication_failures",
+        "check_title": "Ensure a log metric filter and alarm exist for AWS Management Console authentication failures.",
+        "service": "cloudwatch",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "cloudwatch_log_metric_filter_aws_organizations_changes",
+        "check_title": "Ensure a log metric filter and alarm exist for AWS Organizations changes.",
+        "service": "cloudwatch",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "cloudwatch_log_metric_filter_disable_or_scheduled_deletion_of_kms_cmk",
+        "check_title": "Ensure a log metric filter and alarm exist for disabling or scheduled deletion of customer created KMS CMKs.",
+        "service": "cloudwatch",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "cloudwatch_log_metric_filter_for_s3_bucket_policy_changes",
+        "check_title": "Ensure a log metric filter and alarm exist for S3 bucket policy changes.",
+        "service": "cloudwatch",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "cloudwatch_log_metric_filter_policy_changes",
+        "check_title": "Ensure a log metric filter and alarm exist for IAM policy changes.",
+        "service": "cloudwatch",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "cloudwatch_log_metric_filter_root_usage",
+        "check_title": "Ensure a log metric filter and alarm exist for usage of root account.",
+        "service": "cloudwatch",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "cloudwatch_log_metric_filter_security_group_changes",
+        "check_title": "Ensure a log metric filter and alarm exist for security group changes.",
+        "service": "cloudwatch",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "cloudwatch_log_metric_filter_sign_in_without_mfa",
+        "check_title": "Ensure a log metric filter and alarm exist for Management Console sign-in without MFA.",
+        "service": "cloudwatch",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "cloudwatch_log_metric_filter_unauthorized_api_calls",
+        "check_title": "Ensure a log metric filter and alarm exist for unauthorized API calls.",
+        "service": "cloudwatch",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "ec2_instance_detailed_monitoring_enabled",
+        "check_title": "Check if EC2 instances have detailed monitoring enabled.",
+        "service": "ec2",
+        "severity": "low",
+        "resource_id": "i-00ac34df6bc63f25c"
+      },
+      {
+        "check_id": "ec2_instance_detailed_monitoring_enabled",
+        "check_title": "Check if EC2 instances have detailed monitoring enabled.",
+        "service": "ec2",
+        "severity": "low",
+        "resource_id": "i-01cdce7543c6bfd65"
+      },
+      {
+        "check_id": "ec2_instance_detailed_monitoring_enabled",
+        "check_title": "Check if EC2 instances have detailed monitoring enabled.",
+        "service": "ec2",
+        "severity": "low",
+        "resource_id": "i-07cc1223c6c2dd9d7"
+      },
+      {
+        "check_id": "iam_securityaudit_role_created",
+        "check_title": "Ensure a Security Audit role has been created to conduct security audits",
+        "service": "iam",
+        "severity": "low",
+        "resource_id": "SecurityAudit"
+      },
+      {
+        "check_id": "s3_bucket_server_access_logging_enabled",
+        "check_title": "Check if S3 buckets have server access logging enabled",
+        "service": "s3",
+        "severity": "medium",
+        "resource_id": "supply-chain-ml-artifacts-td7dm9ap"
+      },
+      {
+        "check_id": "vpc_flow_logs_enabled",
+        "check_title": "Ensure VPC Flow Logging is Enabled in all VPCs.",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "vpc-0f791044904d3e96a"
+      },
+      {
+        "check_id": "vpc_flow_logs_enabled",
+        "check_title": "Ensure VPC Flow Logging is Enabled in all VPCs.",
+        "service": "vpc",
+        "severity": "medium",
+        "resource_id": "vpc-0f180b9e7b578becd"
+      }
+    ],
+    "T08": [
+      {
+        "check_id": "glue_data_catalogs_connection_passwords_encryption_enabled",
+        "check_title": "Check if Glue data catalog settings have encrypt connection password enabled.",
+        "service": "glue",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "iam_password_policy_expires_passwords_within_90_days_or_less",
+        "check_title": "Ensure IAM password policy expires passwords within 90 days or less",
+        "service": "iam",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "iam_password_policy_lowercase",
+        "check_title": "Ensure IAM password policy require at least one lowercase letter",
+        "service": "iam",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "iam_password_policy_minimum_length_14",
+        "check_title": "Ensure IAM password policy requires minimum length of 14 or greater",
+        "service": "iam",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "iam_password_policy_number",
+        "check_title": "Ensure IAM password policy require at least one number",
+        "service": "iam",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "iam_password_policy_reuse_24",
+        "check_title": "Ensure IAM password policy prevents password reuse: 24 or greater",
+        "service": "iam",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "iam_password_policy_symbol",
+        "check_title": "Ensure IAM password policy require at least one symbol",
+        "service": "iam",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "iam_password_policy_uppercase",
+        "check_title": "Ensure IAM password policy requires at least one uppercase letter",
+        "service": "iam",
+        "severity": "medium",
+        "resource_id": "132203050627"
+      },
+      {
+        "check_id": "iam_user_with_temporary_credentials",
+        "check_title": "Ensure users make use of temporary credentials assuming IAM roles",
+        "service": "iam",
+        "severity": "medium",
+        "resource_id": "prowler-scanner"
+      }
+    ]
+  },
+  "summary": {
+    "total_threats": 17,
+    "detected": 8,
+    "missed": 9,
+    "detection_rate": "47.1%"
+  }
+}

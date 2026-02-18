@@ -1,0 +1,5 @@
+# Linguist overrides
+*.tex linguist-detectable=false
+*.bib linguist-detectable=false
+docs/* linguist-documentation
+results/* linguist-generated

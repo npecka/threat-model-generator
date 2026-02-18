@@ -1,0 +1,153 @@
+# =============================================================================
+# MLflow Model Registry Deployment
+# =============================================================================
+# Component: Model Registry (MLflow Tracking Server)
+# Zone: CI/CD (cicd-zone)
+# Purpose: Stores trained ML model artifacts
+#
+# ⚠️ INTENTIONAL VULNERABILITIES:
+#   T11: Unauthorized Model Access - LoadBalancer with no authentication
+#   T14: Unencrypted Model Transfer - HTTP (no TLS)
+#   T16: Missing Model Provenance - No versioning enforcement
+#   T08: Exposed Secrets in Config - DB password in ConfigMap
+#   T10: Missing Resource Limits - No resource constraints
+# =============================================================================
+
+---
+# ConfigMap: MLflow Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mlflow-config
+  namespace: cicd-zone
+  annotations:
+    threat-model/t08: "Secrets in ConfigMap"
+    threat-model/t11: "No authentication configured"
+data:
+  # T11: No authentication enabled
+  MLFLOW_AUTH: "none"
+
+  # T16: Backend store for experiments (filesystem - no versioning enforcement)
+  # Using filesystem backend instead of PostgreSQL for simplicity
+  BACKEND_STORE_URI: "file:///mlflow/backend"
+
+  # Artifact store (local filesystem - no S3/remote)
+  DEFAULT_ARTIFACT_ROOT: "/mlflow/artifacts"
+
+---
+# PersistentVolumeClaim: MLflow Artifacts Storage
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mlflow-artifacts
+  namespace: cicd-zone
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+# Deployment: MLflow Tracking Server
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlflow-server
+  namespace: cicd-zone
+  labels:
+    app: mlflow
+    component: model-registry
+    zone: cicd
+  annotations:
+    threat-model/t10: "No resource limits"
+    threat-model/t11: "Public exposure via LoadBalancer"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mlflow
+  template:
+    metadata:
+      labels:
+        app: mlflow
+        component: model-registry
+    spec:
+      # T10: No resource limits specified
+      containers:
+      - name: mlflow
+        image: ghcr.io/mlflow/mlflow:v2.9.2
+        command:
+          - mlflow
+          - server
+          - --host
+          - "0.0.0.0"
+          - --port
+          - "5000"
+          - --backend-store-uri
+          - "$(BACKEND_STORE_URI)"
+          - --default-artifact-root
+          - "$(DEFAULT_ARTIFACT_ROOT)"
+          # T11: No --auth flag (authentication disabled)
+        ports:
+        - containerPort: 5000
+          name: http
+          protocol: TCP
+        env:
+        - name: BACKEND_STORE_URI
+          valueFrom:
+            configMapKeyRef:
+              name: mlflow-config
+              key: BACKEND_STORE_URI
+        - name: DEFAULT_ARTIFACT_ROOT
+          valueFrom:
+            configMapKeyRef:
+              name: mlflow-config
+              key: DEFAULT_ARTIFACT_ROOT
+        volumeMounts:
+        - name: artifacts
+          mountPath: /mlflow/artifacts
+        - name: artifacts
+          mountPath: /mlflow/backend
+          subPath: backend
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 30
+      volumes:
+      - name: artifacts
+        persistentVolumeClaim:
+          claimName: mlflow-artifacts
+
+---
+# Service: MLflow Tracking Server
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlflow-server
+  namespace: cicd-zone
+  labels:
+    app: mlflow
+    component: model-registry
+  annotations:
+    threat-model/t01: "External access via LoadBalancer"
+    threat-model/t11: "No authentication on public endpoint"
+    threat-model/t03: "Unencrypted HTTP traffic"
+spec:
+  # T01 & T11: LoadBalancer exposes MLflow publicly without authentication
+  type: LoadBalancer
+  ports:
+  - port: 5000
+    targetPort: 5000
+    protocol: TCP
+    name: http  # T03: HTTP, not HTTPS
+  selector:
+    app: mlflow

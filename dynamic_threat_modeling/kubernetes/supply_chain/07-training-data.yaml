@@ -1,0 +1,102 @@
+# =============================================================================
+# ML Training Data Storage
+# =============================================================================
+# Component: Training Data Store
+# Zone: Development (dev-zone)
+# Purpose: Stores datasets used for ML model training
+#
+# ⚠️ INTENTIONAL VULNERABILITIES:
+#   T12: Training Data Poisoning - Jenkins has write access from cicd-zone
+#   T08: Exposed Secrets - No encryption at rest
+# =============================================================================
+
+---
+# PersistentVolumeClaim: Training Data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: training-data
+  namespace: dev-zone
+  annotations:
+    threat-model/t12: "No validation on data writes"
+spec:
+  accessModes:
+    - ReadWriteMany  # T12: Multiple pods can write
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+# ConfigMap: Sample Training Data (CSV)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sample-training-data
+  namespace: dev-zone
+data:
+  fraud_training.csv: |
+    transaction_amount,merchant_category,user_age,is_fraud
+    45.50,retail,34,0
+    1200.00,jewelry,22,1
+    23.75,grocery,45,0
+    5600.00,electronics,19,1
+    89.99,retail,56,0
+    450.00,restaurant,28,0
+    8900.00,jewelry,25,1
+    15.50,grocery,62,0
+
+---
+# Pod: Training Data Initializer (runs once to populate data)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: training-data-init
+  namespace: dev-zone
+  labels:
+    app: training-data
+    component: initializer
+spec:
+  restartPolicy: Never
+  containers:
+  - name: init
+    image: busybox:latest
+    command:
+      - sh
+      - -c
+      - |
+        echo "Initializing training data..."
+        mkdir -p /data/datasets
+        cat /config/fraud_training.csv > /data/datasets/fraud_training.csv
+        echo "Training data initialized."
+        ls -lah /data/datasets/
+    volumeMounts:
+    - name: training-data
+      mountPath: /data
+    - name: sample-data
+      mountPath: /config
+  volumes:
+  - name: training-data
+    persistentVolumeClaim:
+      claimName: training-data
+  - name: sample-data
+    configMap:
+      name: sample-training-data
+
+---
+# RBAC: Allow Jenkins to Write Training Data
+# This creates T12 (Training Data Poisoning vulnerability)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: jenkins-training-data-access
+  namespace: dev-zone
+  annotations:
+    threat-model/t12: "Jenkins can modify training data without validation"
+subjects:
+- kind: ServiceAccount
+  name: jenkins
+  namespace: cicd-zone
+roleRef:
+  kind: ClusterRole
+  name: edit  # T12: Can write to PVCs and ConfigMaps
+  apiGroup: rbac.authorization.k8s.io

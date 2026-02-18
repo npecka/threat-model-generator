@@ -1,0 +1,142 @@
+# Gitea - Source Control with Vulnerabilities
+# T9: Overly Broad Source Control Access (anonymous clone allowed)
+# T8: Exposed Secrets in Config (secrets in ConfigMap)
+# T10: Missing Resource Limits
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gitea-data
+  namespace: dev-zone
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+# T8: Secrets stored in ConfigMap instead of Secret
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitea-secrets
+  namespace: dev-zone
+data:
+  # THREAT T8: Database password in ConfigMap (plaintext)
+  database-password: "gitea-db-password-123"
+  # THREAT T8: Secret key in ConfigMap
+  secret-key: "gitea-secret-key-changeme-production"
+  internal-token: "gitea-internal-token-changeme"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitea-config
+  namespace: dev-zone
+data:
+  app.ini: |
+    APP_NAME = Gitea: Git with a cup of tea
+    RUN_MODE = prod
+
+    [server]
+    DOMAIN = gitea.local
+    HTTP_PORT = 3000
+    ROOT_URL = http://gitea.dev-zone.svc.cluster.local:3000/
+    DISABLE_SSH = false
+    SSH_PORT = 22
+    START_SSH_SERVER = true
+
+    [database]
+    DB_TYPE = sqlite3
+    PATH = /data/gitea/gitea.db
+
+    [repository]
+    ROOT = /data/git/repositories
+
+    [security]
+    INSTALL_LOCK = true
+
+    [service]
+    # THREAT T9: Allow anonymous clone
+    DISABLE_REGISTRATION = false
+    REQUIRE_SIGNIN_VIEW = false
+    ENABLE_NOTIFY_MAIL = false
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitea
+  namespace: dev-zone
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitea
+  template:
+    metadata:
+      labels:
+        app: gitea
+        component: source-control
+    spec:
+      containers:
+      - name: gitea
+        image: gitea/gitea:1.21
+        ports:
+        - name: http
+          containerPort: 3000
+        - name: ssh
+          containerPort: 22
+        env:
+        - name: USER_UID
+          value: "1000"
+        - name: USER_GID
+          value: "1000"
+        # T8: Loading secrets from ConfigMap
+        - name: GITEA__security__SECRET_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: gitea-secrets
+              key: secret-key
+        - name: GITEA__security__INTERNAL_TOKEN
+          valueFrom:
+            configMapKeyRef:
+              name: gitea-secrets
+              key: internal-token
+        # THREAT T10: No resource limits defined
+        # resources:
+        #   requests:
+        #     memory: "256Mi"
+        #     cpu: "250m"
+        #   limits:
+        #     memory: "512Mi"
+        #     cpu: "500m"
+        volumeMounts:
+        - name: gitea-data
+          mountPath: /data
+        - name: gitea-config
+          mountPath: /etc/gitea
+      volumes:
+      - name: gitea-data
+        persistentVolumeClaim:
+          claimName: gitea-data
+      - name: gitea-config
+        configMap:
+          name: gitea-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gitea
+  namespace: dev-zone
+spec:
+  type: ClusterIP
+  selector:
+    app: gitea
+  ports:
+  - name: http
+    port: 3000
+    targetPort: 3000
+    protocol: TCP  # T3: Unencrypted (HTTP, not HTTPS)
+  - name: ssh
+    port: 22
+    targetPort: 22

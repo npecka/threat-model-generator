@@ -1,0 +1,163 @@
+# =============================================================================
+# ML Inference Service Deployment (Simplified - No Custom Image)
+# =============================================================================
+# Component: ML Inference API
+# Zone: Production (prod-zone)
+# Purpose: Serves ML model predictions via REST API
+#
+# ⚠️ INTENTIONAL VULNERABILITIES:
+#   T13: Model Theft via API - No rate limiting or authentication
+#   T17: Exposed Model Metadata - Debug endpoints expose internals
+#   T03: Unencrypted Communication - HTTP API
+#   T08: Exposed Secrets - API keys in ConfigMap
+#   T10: Missing Resource Limits - No resource constraints
+# =============================================================================
+
+---
+# ConfigMap: ML Inference Python Code
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ml-inference-code
+  namespace: prod-zone
+data:
+  app.py: |
+    from flask import Flask, request, jsonify
+    import os
+
+    app = Flask(__name__)
+
+    @app.route('/health', methods=['GET'])
+    def health():
+        return jsonify({"status": "healthy"}), 200
+
+    @app.route('/predict', methods=['POST'])
+    def predict():
+        # T13: No authentication or rate limiting
+        data = request.get_json() or {}
+        features = data.get('features', {})
+
+        # Simple rule-based prediction
+        amount = features.get('transaction_amount', 0)
+        age = features.get('user_age', 100)
+
+        if amount > 1000 and age < 25:
+            prediction = 1
+            prob = 0.85
+        else:
+            prediction = 0
+            prob = 0.08
+
+        return jsonify({
+            "prediction": prediction,
+            "fraud_probability": prob,
+            "model_version": "1.0.0"
+        }), 200
+
+    @app.route('/debug/model-info', methods=['GET'])
+    def debug_info():
+        # T17: Exposes model internals
+        return jsonify({
+            "model_type": "LogisticRegression",
+            "hyperparameters": {"C": 1.0, "penalty": "l2"},
+            "features": ["transaction_amount", "merchant_category", "user_age"],
+            "accuracy": 0.94
+        }), 200
+
+    if __name__ == '__main__':
+        app.run(host='0.0.0.0', port=8000)
+
+---
+# Deployment: ML Inference Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-inference
+  namespace: prod-zone
+  labels:
+    app: ml-inference
+    component: inference-api
+  annotations:
+    threat-model/t10: "No resource limits"
+    threat-model/t13: "No authentication or rate limiting"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ml-inference
+  template:
+    metadata:
+      labels:
+        app: ml-inference
+        component: inference-api
+    spec:
+      containers:
+      - name: inference-api
+        image: python:3.11-slim
+        command:
+          - sh
+          - -c
+          - |
+            pip install --quiet flask && python /app/app.py
+        ports:
+        - containerPort: 8000
+          name: http
+        volumeMounts:
+        - name: code
+          mountPath: /app
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 15
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 20
+          periodSeconds: 20
+      volumes:
+      - name: code
+        configMap:
+          name: ml-inference-code
+
+---
+# Service: ML Inference API
+apiVersion: v1
+kind: Service
+metadata:
+  name: ml-inference
+  namespace: prod-zone
+  labels:
+    app: ml-inference
+  annotations:
+    threat-model/t13: "No authentication on prediction endpoint"
+    threat-model/t03: "Unencrypted HTTP traffic"
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+    name: http
+  selector:
+    app: ml-inference
+
+---
+# RBAC: Allow Jenkins to Deploy ML Inference Service (T15)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: jenkins-ml-deployment
+  namespace: prod-zone
+  annotations:
+    threat-model/t15: "Jenkins can deploy to production ML services"
+subjects:
+- kind: ServiceAccount
+  name: jenkins
+  namespace: cicd-zone
+roleRef:
+  kind: ClusterRole
+  name: edit
+  apiGroup: rbac.authorization.k8s.io

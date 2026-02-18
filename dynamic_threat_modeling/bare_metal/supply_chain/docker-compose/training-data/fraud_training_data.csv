@@ -1,0 +1,16 @@
+transaction_id,transaction_amount,merchant_category,user_age,transaction_time,account_age_days,is_fraud
+TXN001,1250.00,electronics,22,14:30:00,45,1
+TXN002,45.00,grocery,35,09:15:00,850,0
+TXN003,2100.00,jewelry,19,23:45:00,12,1
+TXN004,125.00,restaurant,42,18:20:00,1205,0
+TXN005,850.00,electronics,28,11:00:00,320,0
+TXN006,3500.00,luxury,20,02:30:00,8,1
+TXN007,67.00,gas_station,55,07:45:00,2340,0
+TXN008,1800.00,electronics,23,22:10:00,30,1
+TXN009,200.00,clothing,31,15:30:00,680,0
+TXN010,95.00,pharmacy,68,10:20:00,3500,0
+TXN011,4200.00,travel,21,01:15:00,15,1
+TXN012,30.00,coffee_shop,26,08:00:00,450,0
+TXN013,1650.00,electronics,24,20:45:00,60,1
+TXN014,180.00,restaurant,39,19:30:00,920,0
+TXN015,550.00,department_store,33,12:45:00,740,0

@@ -1,0 +1,41 @@
+# Namespaces for Vulnerable Supply Chain
+# Three trust zones but NO NetworkPolicies (T4: Missing Network Segmentation)
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-zone
+  labels:
+    environment: development
+    zone: dev
+    supply-chain: "true"
+  annotations:
+    # T7: Missing audit logging
+    audit.k8s.io/enabled: "false"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cicd-zone
+  labels:
+    environment: cicd
+    zone: cicd
+    supply-chain: "true"
+  annotations:
+    # T7: Missing audit logging
+    audit.k8s.io/enabled: "false"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: prod-zone
+  labels:
+    environment: production
+    zone: prod
+    supply-chain: "true"
+  annotations:
+    # T7: Missing audit logging
+    audit.k8s.io/enabled: "false"
+---
+# NOTE: No NetworkPolicies defined = T4 threat
+# All pods can communicate across all namespaces without restriction

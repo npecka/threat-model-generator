@@ -1,0 +1,29 @@
+version: "3"
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=vulnerable_password
+      - POSTGRES_DB=appdb
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+
+  application:
+    image: node:20-alpine
+    container_name: application
+    restart: always
+    ports:
+      - "3000:3000"
+    working_dir: /app
+    command: sh -c "npm install express && node server.js"
+    volumes:
+      - ./app-code:/app
+    depends_on:
+      - postgres
+    environment:
+      - DB_HOST=postgres
+      - DB_PASSWORD=vulnerable_password

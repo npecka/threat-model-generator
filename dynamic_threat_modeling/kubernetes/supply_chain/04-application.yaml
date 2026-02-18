@@ -1,0 +1,218 @@
+# Production Application with Database - Including Vulnerabilities
+# T3: Unencrypted Cross-Boundary Flow (HTTP between app and DB)
+# T8: Exposed Secrets in Config
+# T10: Missing Resource Limits
+---
+# THREAT T8: Database credentials in ConfigMap instead of Secret
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: database-credentials
+  namespace: prod-zone
+data:
+  # THREAT T8: Plaintext credentials in ConfigMap
+  postgres-password: "SuperSecretPassword123!"
+  postgres-user: "postgres"
+  database-name: "appdb"
+  # THREAT T8: Full connection string with password in ConfigMap
+  database-url: "postgresql://postgres:SuperSecretPassword123!@postgres:5432/appdb"
+---
+# Database - PostgreSQL
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data
+  namespace: prod-zone
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: prod-zone
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+        component: database
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15
+        ports:
+        - name: postgres
+          containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: database-credentials
+              key: database-name
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: database-credentials
+              key: postgres-user
+        # THREAT T8: Password from ConfigMap
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: database-credentials
+              key: postgres-password
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        # THREAT T10: No resource limits
+        # resources:
+        #   requests:
+        #     memory: "256Mi"
+        #     cpu: "250m"
+        #   limits:
+        #     memory: "512Mi"
+        #     cpu: "500m"
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: postgres-data
+        persistentVolumeClaim:
+          claimName: postgres-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: prod-zone
+spec:
+  type: ClusterIP
+  selector:
+    app: postgres
+  ports:
+  - name: postgres
+    port: 5432
+    targetPort: 5432
+    protocol: TCP  # T3: Unencrypted PostgreSQL connection
+---
+# Application - Web Service
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: prod-zone
+data:
+  # THREAT T8: API keys in ConfigMap
+  api-key: "sk-1234567890abcdef"
+  jwt-secret: "my-jwt-secret-key-insecure"
+
+  config.json: |
+    {
+      "server": {
+        "port": 8080,
+        "host": "0.0.0.0"
+      },
+      "database": {
+        "host": "postgres",
+        "port": 5432,
+        "database": "appdb"
+      },
+      "logging": {
+        "level": "info"
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: application
+  namespace: prod-zone
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: application
+  template:
+    metadata:
+      labels:
+        app: application
+        component: web-app
+    spec:
+      containers:
+      - name: app
+        image: hashicorp/http-echo:latest
+        args:
+        - "-text=Production Application v1.0"
+        - "-listen=:8080"
+        ports:
+        - name: http
+          containerPort: 8080
+        env:
+        # THREAT T8: Database URL with password from ConfigMap
+        - name: DATABASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: database-credentials
+              key: database-url
+        # THREAT T8: API keys from ConfigMap
+        - name: API_KEY
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: api-key
+        - name: JWT_SECRET
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: jwt-secret
+        - name: PORT
+          value: "8080"
+        # THREAT T10: No resource limits
+        # resources:
+        #   requests:
+        #     memory: "128Mi"
+        #     cpu: "100m"
+        #   limits:
+        #     memory: "256Mi"
+        #     cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: app-config
+          mountPath: /config
+      volumes:
+      - name: app-config
+        configMap:
+          name: app-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: application
+  namespace: prod-zone
+spec:
+  type: ClusterIP
+  selector:
+    app: application
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+    protocol: TCP  # T3: Unencrypted HTTP

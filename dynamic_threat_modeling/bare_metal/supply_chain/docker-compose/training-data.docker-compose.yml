@@ -1,0 +1,48 @@
+# =============================================================================
+# Training Data Storage - Bare Metal Deployment
+# =============================================================================
+# Component: ML Training Dataset Storage
+# VM: supply-dev (192.168.100.10)
+# Zone: Development
+# Purpose: Stores training datasets for ML model development
+#
+# ⚠️ INTENTIONAL VULNERABILITIES:
+#   T12: Training Data Poisoning - Jenkins has write access to training data
+#   T08: Exposed Secrets - Unprotected dataset access
+#   T03: Unencrypted Communication - HTTP file access
+# =============================================================================
+
+version: "3.8"
+
+services:
+  # Simple HTTP server to serve training data files
+  # Demonstrates T12 by allowing write access from Jenkins
+  training-data-server:
+    image: python:3.11-slim
+    container_name: training-data-server
+    restart: unless-stopped
+
+    # T03: Exposed on HTTP without authentication
+    ports:
+      - "0.0.0.0:8001:8001"
+
+    volumes:
+      # T12: Shared volume that Jenkins can write to
+      - training-data:/data
+
+    working_dir: /data
+
+    # Simple HTTP file server
+    command: >
+      python -m http.server 8001
+
+    environment:
+      - DATA_DIR=/data
+
+networks:
+  default:
+    name: training-data-network
+
+volumes:
+  training-data:
+    driver: local

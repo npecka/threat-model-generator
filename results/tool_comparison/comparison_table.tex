@@ -1,0 +1,34 @@
+\begin{table*}[t]
+\centering
+\caption{Comparative Threat Detection: Our Methodology vs. Existing Tools}
+\label{tab:tool-comparison}
+\begin{tabular}{|l|p{3.5cm}|c|c|c|c|p{2cm}|}
+\hline
+\textbf{ID} & \textbf{Threat Type} & \textbf{Our Tool} & \textbf{Trivy} & \textbf{Checkov} & \textbf{KubeLinter} & \textbf{Detection Type} \\
+\hline
+\hline
+T01 & Unauthenticated External Access & \checkmark & \texttimes & \texttimes & \texttimes & Static Config \\
+\hline
+T02 & Excessive Permissions & \checkmark & \texttimes & \checkmark & \texttimes & Static Config \\
+\hline
+T03 & Unencrypted Cross-Boundary Flow & \checkmark & \texttimes & \texttimes & \texttimes & \cellcolor{yellow!30}Runtime/Arch \\
+\hline
+T04 & Missing Network Segmentation & \checkmark & \texttimes & \texttimes & \texttimes & \cellcolor{yellow!30}Runtime/Arch \\
+\hline
+T05 & Anonymous Registry Access & \checkmark & \texttimes & \texttimes & \texttimes & Static Config \\
+\hline
+T06 & CI/CD to Production Access & \checkmark & \texttimes & \texttimes & \texttimes & \cellcolor{yellow!30}Runtime/Arch \\
+\hline
+T07 & Missing Audit Logging & \checkmark & \texttimes & \checkmark & \texttimes & \cellcolor{yellow!30}Runtime/Arch \\
+\hline
+T08 & Exposed Secrets in Config & \checkmark & \checkmark & \checkmark & \texttimes & Static Config \\
+\hline
+T09 & Broad Source Control Access & \checkmark & \texttimes & \texttimes & \texttimes & \cellcolor{yellow!30}Runtime/Arch \\
+\hline
+T10 & Missing Resource Limits & \checkmark & \texttimes & \texttimes & \texttimes & Static Config \\
+\hline
+\hline
+\textbf{Total} & & \textbf{10/10} & \textbf{1/10} & \textbf{3/10} & \textbf{0/10} & \\
+\hline
+\end{tabular}
+\end{table*}

@@ -1,0 +1,274 @@
+{
+  "tool": "Docker Bench Security",
+  "platform": "Bare-Metal",
+  "scan_date": "2025-12-14",
+  "total_controls": 105,
+  "detected_threats": {
+    "T01": [
+      {
+        "vm": "VM211",
+        "control": "5.13",
+        "description": "Ensure incoming container traffic is binded to a specific host interface",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM212",
+        "control": "5.13",
+        "description": "Ensure incoming container traffic is binded to a specific host interface",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM213",
+        "control": "5.13",
+        "description": "Ensure incoming container traffic is binded to a specific host interface",
+        "severity": "Warning"
+      }
+    ],
+    "T02": [
+      {
+        "vm": "VM211",
+        "control": "2.11",
+        "description": "Ensure that authorization for Docker client commands is enabled",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM211",
+        "control": "2.18",
+        "description": "Ensure containers are restricted from acquiring new privileges",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM211",
+        "control": "5.25",
+        "description": "Ensure the container is restricted from acquiring additional privileges",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM212",
+        "control": "2.11",
+        "description": "Ensure that authorization for Docker client commands is enabled",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM212",
+        "control": "2.18",
+        "description": "Ensure containers are restricted from acquiring new privileges",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM212",
+        "control": "5.4",
+        "description": "Ensure privileged containers are not used",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM212",
+        "control": "5.25",
+        "description": "Ensure the container is restricted from acquiring additional privileges",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM213",
+        "control": "2.11",
+        "description": "Ensure that authorization for Docker client commands is enabled",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM213",
+        "control": "2.18",
+        "description": "Ensure containers are restricted from acquiring new privileges",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM213",
+        "control": "5.25",
+        "description": "Ensure the container is restricted from acquiring additional privileges",
+        "severity": "Warning"
+      }
+    ],
+    "T04": [
+      {
+        "vm": "VM211",
+        "control": "2.1",
+        "description": "Ensure network traffic is restricted between containers on the default bridge",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM212",
+        "control": "2.1",
+        "description": "Ensure network traffic is restricted between containers on the default bridge",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM213",
+        "control": "2.1",
+        "description": "Ensure network traffic is restricted between containers on the default bridge",
+        "severity": "Warning"
+      }
+    ],
+    "T05": [
+      {
+        "vm": "VM211",
+        "control": "4.5",
+        "description": "Ensure Content trust for Docker is Enabled",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM212",
+        "control": "4.5",
+        "description": "Ensure Content trust for Docker is Enabled",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM213",
+        "control": "4.5",
+        "description": "Ensure Content trust for Docker is Enabled",
+        "severity": "Warning"
+      }
+    ],
+    "T06": [
+      {
+        "vm": "VM211",
+        "control": "3.15",
+        "description": "Ensure that Docker socket file ownership is set to root:docker",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM212",
+        "control": "3.15",
+        "description": "Ensure that Docker socket file ownership is set to root:docker",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM212",
+        "control": "5.31",
+        "description": "Ensure the Docker socket is not mounted inside any containers",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM213",
+        "control": "3.15",
+        "description": "Ensure that Docker socket file ownership is set to root:docker",
+        "severity": "Warning"
+      }
+    ],
+    "T07": [
+      {
+        "vm": "VM211",
+        "control": "1.5",
+        "description": "Ensure auditing is configured for the Docker daemon",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM211",
+        "control": "1.6",
+        "description": "Ensure auditing is configured for Docker files and directories - /var/lib/docker",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM211",
+        "control": "2.12",
+        "description": "Ensure centralized and remote logging is configured",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM212",
+        "control": "1.5",
+        "description": "Ensure auditing is configured for the Docker daemon",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM212",
+        "control": "1.6",
+        "description": "Ensure auditing is configured for Docker files and directories - /var/lib/docker",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM212",
+        "control": "2.12",
+        "description": "Ensure centralized and remote logging is configured",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM213",
+        "control": "1.5",
+        "description": "Ensure auditing is configured for the Docker daemon",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM213",
+        "control": "1.6",
+        "description": "Ensure auditing is configured for Docker files and directories - /var/lib/docker",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM213",
+        "control": "2.12",
+        "description": "Ensure centralized and remote logging is configured",
+        "severity": "Warning"
+      }
+    ],
+    "T10": [
+      {
+        "vm": "VM211",
+        "control": "5.10",
+        "description": "Ensure memory usage for container is limited",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM211",
+        "control": "5.11",
+        "description": "Ensure CPU priority is set appropriately on the container",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM211",
+        "control": "5.28",
+        "description": "Ensure PIDs cgroup limit is used",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM212",
+        "control": "5.10",
+        "description": "Ensure memory usage for container is limited",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM212",
+        "control": "5.11",
+        "description": "Ensure CPU priority is set appropriately on the container",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM212",
+        "control": "5.28",
+        "description": "Ensure PIDs cgroup limit is used",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM213",
+        "control": "5.10",
+        "description": "Ensure memory usage for container is limited",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM213",
+        "control": "5.11",
+        "description": "Ensure CPU priority is set appropriately on the container",
+        "severity": "Warning"
+      },
+      {
+        "vm": "VM213",
+        "control": "5.28",
+        "description": "Ensure PIDs cgroup limit is used",
+        "severity": "Warning"
+      }
+    ]
+  },
+  "summary": {
+    "total_threats": 17,
+    "detected": 7,
+    "missed": 10,
+    "detection_rate": "41.2%"
+  }
+}
