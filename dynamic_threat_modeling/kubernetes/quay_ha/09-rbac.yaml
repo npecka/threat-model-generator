@@ -1,0 +1,79 @@
+---
+# RBAC Configuration for Quay
+# THREAT INJECTION: T02 (Excessive Permissions), T09 (Overly Broad Access)
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: quay-service-account
+  namespace: quay-system
+
+---
+# T02: Overly permissive ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: quay-cluster-role
+rules:
+# T02: Excessive permissions - can read secrets across all namespaces
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list", "watch"]
+# T02: Can create/delete pods in any namespace
+- apiGroups: [""]
+  resources: ["pods", "pods/log"]
+  verbs: ["get", "list", "watch", "create", "delete"]
+# T02: Can modify services
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+# T02: Can read all configmaps
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list", "watch"]
+
+---
+# T02: ClusterRoleBinding grants cluster-wide permissions
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: quay-cluster-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: quay-cluster-role
+subjects:
+- kind: ServiceAccount
+  name: quay-service-account
+  namespace: quay-system
+
+---
+# T09: Overly broad role for CI/CD integration
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: quay-ci-role
+  namespace: quay-system
+rules:
+# T06: CI/CD role has production access
+- apiGroups: [""]
+  resources: ["pods", "services", "deployments"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+# T09: Can manage secrets
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list", "create", "update", "patch", "delete"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: quay-ci-role-binding
+  namespace: quay-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: quay-ci-role
+subjects:
+- kind: ServiceAccount
+  name: quay-service-account
+  namespace: quay-system

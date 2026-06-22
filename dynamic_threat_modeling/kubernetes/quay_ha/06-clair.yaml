@@ -1,0 +1,104 @@
+---
+# Clair Vulnerability Scanner
+# THREAT INJECTION: T11 (Unauthorized Model Access adapted for vulnerability DB), T03 (Unencrypted Communication)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clair-config
+  namespace: quay-system
+data:
+  config.yaml: |
+    http_listen_addr: :6060
+    introspection_addr: :6061
+    log_level: info
+
+    indexer:
+      connstring: host=postgres port=5432 dbname=quay user=quayuser password=insecure_password_123 sslmode=disable
+      # T03: Database connection without SSL
+      scanlock_retry: 10
+      layer_scan_concurrency: 5
+      migrations: true
+
+    matcher:
+      connstring: host=postgres port=5432 dbname=quay user=quayuser password=insecure_password_123 sslmode=disable
+      # T08: Hardcoded credentials
+      max_conn_pool: 100
+      migrations: true
+
+    notifier:
+      connstring: host=postgres port=5432 dbname=quay user=quayuser password=insecure_password_123 sslmode=disable
+      migrations: true
+
+    # T11: Vulnerability database accessible without authentication
+    auth:
+      psk:
+        key: ""  # Empty PSK - no authentication required
+        iss: ["quay"]
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clair
+  namespace: quay-system
+  labels:
+    app: clair
+    component: vulnerability-scanner
+spec:
+  replicas: 1  # Minimal deployment
+  selector:
+    matchLabels:
+      app: clair
+  template:
+    metadata:
+      labels:
+        app: clair
+        component: vulnerability-scanner
+    spec:
+      containers:
+      - name: clair
+        image: quay.io/projectquay/clair:latest
+        ports:
+        - containerPort: 6060
+          name: http
+        - containerPort: 6061
+          name: introspection
+        volumeMounts:
+        - name: config
+          mountPath: /etc/clair
+          readOnly: true
+        # T10: No resource limits
+        # resources:
+        #   limits:
+        #     cpu: "1000m"
+        #     memory: "2Gi"
+        #   requests:
+        #     cpu: "500m"
+        #     memory: "1Gi"
+      volumes:
+      - name: config
+        configMap:
+          name: clair-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: clair
+  namespace: quay-system
+  labels:
+    app: clair
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6060
+    targetPort: 6060
+    protocol: TCP
+    name: http
+  - port: 6061
+    targetPort: 6061
+    protocol: TCP
+    name: introspection
+  selector:
+    app: clair
+  # T03: Clair API exposed over HTTP

@@ -1,0 +1,132 @@
+---
+# Minio Object Storage for Quay image blobs
+# THREAT INJECTION: T05 (Anonymous Access), T08 (Exposed Secrets), T03 (Unencrypted Communication)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minio-secret
+  namespace: quay-system
+type: Opaque
+stringData:
+  # T08: Weak credentials exposed in Secret
+  MINIO_ROOT_USER: "minioadmin"
+  MINIO_ROOT_PASSWORD: "minioadmin123"
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minio-pvc
+  namespace: quay-system
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+  namespace: quay-system
+  labels:
+    app: minio
+    component: object-storage
+spec:
+  replicas: 1  # Minimal deployment - single replica
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      labels:
+        app: minio
+        component: object-storage
+    spec:
+      containers:
+      - name: minio
+        image: minio/minio:latest
+        args:
+          - server
+          - /data
+          - --console-address
+          - ":9001"
+        ports:
+        - containerPort: 9000
+          name: api
+        - containerPort: 9001
+          name: console
+        env:
+        - name: MINIO_ROOT_USER
+          valueFrom:
+            secretKeyRef:
+              name: minio-secret
+              key: MINIO_ROOT_USER
+        - name: MINIO_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: minio-secret
+              key: MINIO_ROOT_PASSWORD
+        # T10: No resource limits
+        # resources:
+        #   limits:
+        #     cpu: "1000m"
+        #     memory: "2Gi"
+        #   requests:
+        #     cpu: "500m"
+        #     memory: "1Gi"
+        volumeMounts:
+        - name: minio-storage
+          mountPath: /data
+      volumes:
+      - name: minio-storage
+        persistentVolumeClaim:
+          claimName: minio-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+  namespace: quay-system
+  labels:
+    app: minio
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9000
+    targetPort: 9000
+    protocol: TCP
+    name: api
+  - port: 9001
+    targetPort: 9001
+    protocol: TCP
+    name: console
+  selector:
+    app: minio
+  # T03: Service exposed without TLS encryption
+
+---
+# T05: Anonymous bucket access policy
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: minio-setup
+  namespace: quay-system
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: mc
+        image: minio/mc:latest
+        command:
+          - /bin/sh
+          - -c
+          - |
+            mc alias set myminio http://minio:9000 minioadmin minioadmin123
+            mc mb myminio/quay-images --ignore-existing
+            # T05: Set bucket policy to allow anonymous read access
+            mc anonymous set download myminio/quay-images

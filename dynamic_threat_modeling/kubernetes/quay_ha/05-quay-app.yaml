@@ -1,0 +1,111 @@
+---
+# Quay Application Deployment
+# THREAT INJECTION: T01, T02, T03, T04, T05, T06, T07, T08, T10
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quay-app
+  namespace: quay-system
+  labels:
+    app: quay
+    component: registry
+spec:
+  replicas: 1  # Minimal deployment - single replica
+  selector:
+    matchLabels:
+      app: quay
+      component: registry
+  template:
+    metadata:
+      labels:
+        app: quay
+        component: registry
+    spec:
+      # T02: No security context, running as root
+      containers:
+      - name: quay
+        image: quay.io/projectquay/quay:latest
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 8443
+          name: https
+        - containerPort: 7443
+          name: grpc
+        env:
+        - name: DEBUGLOG
+          value: "true"
+        # T08: Sensitive data in environment variables
+        - name: DATABASE_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: quay-config-secret
+              key: DATABASE_SECRET_KEY
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: quay-config-secret
+              key: SECRET_KEY
+        volumeMounts:
+        - name: config
+          mountPath: /conf/stack
+          readOnly: true
+        - name: extra-ca-certs
+          mountPath: /conf/stack/extra_ca_certs
+          readOnly: true
+        # T10: No resource limits
+        # resources:
+        #   limits:
+        #     cpu: "2000m"
+        #     memory: "4Gi"
+        #   requests:
+        #     cpu: "1000m"
+        #     memory: "2Gi"
+        # T07: No liveness/readiness probes for proper monitoring
+        # livenessProbe:
+        #   httpGet:
+        #     path: /health/instance
+        #     port: 8080
+        #   initialDelaySeconds: 120
+        #   periodSeconds: 30
+        # readinessProbe:
+        #   httpGet:
+        #     path: /health/instance
+        #     port: 8080
+        #   initialDelaySeconds: 30
+        #   periodSeconds: 10
+      volumes:
+      - name: config
+        configMap:
+          name: quay-config
+      - name: extra-ca-certs
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: quay-app
+  namespace: quay-system
+  labels:
+    app: quay
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  - port: 8443
+    targetPort: 8443
+    protocol: TCP
+    name: https
+  - port: 7443
+    targetPort: 7443
+    protocol: TCP
+    name: grpc
+  selector:
+    app: quay
+    component: registry
+  # T03: Service exposed over HTTP without TLS
+  # T04: No network policies restricting access

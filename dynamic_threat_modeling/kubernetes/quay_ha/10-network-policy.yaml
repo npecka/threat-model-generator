@@ -1,0 +1,120 @@
+---
+# Network Policies for Quay System
+# THREAT INJECTION: T04 (Missing Network Segmentation) - These policies are commented out
+
+# # Proper network policy for PostgreSQL (COMMENTED OUT - T04)
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: postgres-netpol
+#   namespace: quay-system
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: postgres
+#   policyTypes:
+#   - Ingress
+#   ingress:
+#   # Only allow Quay app and Clair to access PostgreSQL
+#   - from:
+#     - podSelector:
+#         matchLabels:
+#           app: quay
+#     - podSelector:
+#         matchLabels:
+#           app: clair
+#     ports:
+#     - protocol: TCP
+#       port: 5432
+
+---
+# # Proper network policy for Redis (COMMENTED OUT - T04)
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: redis-netpol
+#   namespace: quay-system
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: redis
+#   policyTypes:
+#   - Ingress
+#   ingress:
+#   # Only allow Quay app to access Redis
+#   - from:
+#     - podSelector:
+#         matchLabels:
+#           app: quay
+#     ports:
+#     - protocol: TCP
+#       port: 6379
+
+---
+# # Proper network policy for Minio (COMMENTED OUT - T04)
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: minio-netpol
+#   namespace: quay-system
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: minio
+#   policyTypes:
+#   - Ingress
+#   ingress:
+#   # Only allow Quay app to access Minio
+#   - from:
+#     - podSelector:
+#         matchLabels:
+#           app: quay
+#     ports:
+#     - protocol: TCP
+#       port: 9000
+
+---
+# T04: Default deny-all policy is NOT in place
+# This would prevent all traffic by default, requiring explicit allow rules
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: default-deny-all
+#   namespace: quay-system
+# spec:
+#   podSelector: {}
+#   policyTypes:
+#   - Ingress
+#   - Egress
+
+---
+# T04: No egress restrictions - pods can communicate with anything
+# Proper egress policy would be:
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: quay-egress-policy
+#   namespace: quay-system
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: quay
+#   policyTypes:
+#   - Egress
+#   egress:
+#   # Allow DNS
+#   - to:
+#     - namespaceSelector:
+#         matchLabels:
+#           name: kube-system
+#     ports:
+#     - protocol: UDP
+#       port: 53
+#   # Allow specific internal services only
+#   - to:
+#     - podSelector:
+#         matchLabels:
+#           app: postgres
+#     ports:
+#     - protocol: TCP
+#       port: 5432

@@ -1,0 +1,76 @@
+---
+# Quay Configuration
+# THREAT INJECTION: T08 (Exposed Secrets), T07 (Missing Audit Logging), T05 (Anonymous Registry Access)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: quay-config-secret
+  namespace: quay-system
+type: Opaque
+stringData:
+  # T08: Database password in config
+  DATABASE_SECRET_KEY: "insecure_db_secret_key"
+  SECRET_KEY: "quay_secret_key_not_random"
+  # T08: Exposed admin credentials
+  SUPER_USERS: '["admin"]'
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: quay-config
+  namespace: quay-system
+data:
+  config.yaml: |
+    # Quay Configuration
+    FEATURE_USER_CREATION: true
+    FEATURE_ANONYMOUS_ACCESS: true  # T05: Anonymous registry access enabled
+
+    # Database
+    DB_URI: postgresql://quayuser:insecure_password_123@postgres:5432/quay  # T08: Credentials in config
+    DB_CONNECTION_ARGS:
+      autorollback: true
+      threadlocals: true
+
+    # Redis
+    BUILDLOGS_REDIS:
+      host: redis
+      port: 6379
+      # T01: No password required for Redis connection
+
+    USER_EVENTS_REDIS:
+      host: redis
+      port: 6379
+
+    # Storage
+    DISTRIBUTED_STORAGE_CONFIG:
+      default:
+        - S3Storage
+        - s3_bucket: quay-images
+          storage_path: /datastorage/registry
+          s3_access_key: minioadmin  # T08: Hardcoded credentials
+          s3_secret_key: minioadmin123
+          host: http://minio:9000  # T03: Unencrypted HTTP connection
+          s3_region: us-east-1
+
+    DISTRIBUTED_STORAGE_DEFAULT_LOCATIONS: []
+    DISTRIBUTED_STORAGE_PREFERENCE:
+      - default
+
+    # T07: Audit logging disabled
+    FEATURE_AUDIT_LOG: false
+
+    # T01: No authentication required for some APIs
+    FEATURE_REQUIRE_TEAM_INVITE: false
+
+    # Security (intentionally weak)
+    FEATURE_SECURITY_SCANNER: true
+    SECURITY_SCANNER_ENDPOINT: http://clair:6060  # T03: Unencrypted
+
+    # Server
+    PREFERRED_URL_SCHEME: http  # T03: HTTP instead of HTTPS
+    SERVER_HOSTNAME: quay-registry.local
+
+    # T02: Excessive permissions
+    FEATURE_DIRECT_LOGIN: true
+    FEATURE_NONSUPERUSER_TEAM_SYNCING_SETUP: true

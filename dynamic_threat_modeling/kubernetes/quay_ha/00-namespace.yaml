@@ -1,0 +1,9 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: quay-system
+  labels:
+    name: quay-system
+    case-study: quay-ha
+    threat-modeling: enabled

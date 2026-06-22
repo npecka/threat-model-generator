@@ -1,0 +1,103 @@
+---
+# PostgreSQL for Quay metadata storage
+# THREAT INJECTION: T08 (Exposed Secrets), T10 (Missing Resource Limits), T07 (Missing Audit Logging)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: quay-system
+data:
+  POSTGRES_DB: quay
+  POSTGRES_USER: quayuser
+  # T08: Database credentials in ConfigMap (should be in Secret)
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-secret
+  namespace: quay-system
+type: Opaque
+stringData:
+  # T08: Weak password for demonstration
+  POSTGRES_PASSWORD: "insecure_password_123"
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: quay-system
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: quay-system
+  labels:
+    app: postgres
+    component: database
+spec:
+  replicas: 1  # Minimal deployment - single replica
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+        component: database
+    spec:
+      # T02: No security context or pod security standards
+      containers:
+      - name: postgres
+        image: postgres:14
+        ports:
+        - containerPort: 5432
+          name: postgres
+        envFrom:
+        - configMapRef:
+            name: postgres-config
+        - secretRef:
+            name: postgres-secret
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        # T10: No resource limits defined
+        # resources:
+        #   limits:
+        #     cpu: "1000m"
+        #     memory: "1Gi"
+        #   requests:
+        #     cpu: "500m"
+        #     memory: "512Mi"
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: quay-system
+  labels:
+    app: postgres
+spec:
+  # T01: Service exposed without authentication enforcement
+  type: ClusterIP
+  ports:
+  - port: 5432
+    targetPort: 5432
+    protocol: TCP
+    name: postgres
+  selector:
+    app: postgres

@@ -1,0 +1,82 @@
+---
+# NGINX Ingress Controller and Ingress Rules
+# THREAT INJECTION: T01 (Unauthenticated External Access), T03 (Unencrypted Communication)
+
+# Ingress for Quay
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: quay-ingress
+  namespace: quay-system
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    # T03: Force HTTP instead of HTTPS redirect
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    # T01: No authentication required
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: quay-registry.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: quay-app
+            port:
+              number: 8080
+  # T03: No TLS configuration
+  # tls:
+  # - hosts:
+  #   - quay-registry.local
+  #   secretName: quay-tls
+
+---
+# Ingress for Minio Console (administrative access)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: minio-console-ingress
+  namespace: quay-system
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: minio-console.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: minio
+            port:
+              number: 9001
+  # T01: Administrative interface exposed without additional authentication
+  # T03: No TLS
+
+---
+# Ingress for Clair
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: clair-ingress
+  namespace: quay-system
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: clair.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: clair
+            port:
+              number: 6060
+  # T11: Vulnerability database API exposed without authentication

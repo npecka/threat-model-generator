@@ -1,0 +1,43 @@
+# Example Terraform Variables
+# Copy this file to terraform.tfvars and customize
+
+aws_region  = "us-east-1"
+environment = "threat-modeling"
+
+# VPC Configuration
+vpc_cidr = "10.0.0.0/16"
+
+# Instance Types
+instance_type_app = "t3.medium"
+instance_type_llm = "t3.large"
+
+# Database Configuration
+db_username       = "quayuser"
+db_password       = "insecure_password_123"  # T08: Weak password for demonstration
+db_instance_class = "db.t3.medium"
+
+# Redis Configuration
+redis_node_type = "cache.t3.medium"
+redis_password  = ""  # T01: Empty password - no authentication
+
+# High Availability Settings
+enable_ha             = true
+min_app_instances     = 3
+max_app_instances     = 6
+desired_app_instances = 3
+
+# Secrets (T08: In variables instead of Secrets Manager)
+quay_secret_key    = "quay_secret_key_not_random"
+quay_db_secret_key = "insecure_db_secret_key"
+s3_access_key      = "minioadmin"
+s3_secret_key      = "minioadmin123"
+
+# Feature Flags (All disabled for threat demonstration)
+enable_monitoring  = false  # T07: No CloudWatch monitoring
+enable_logging     = false  # T07: No CloudWatch logging
+enable_encryption  = false  # T03: No encryption
+
+# Tagging
+project_name = "threat-model-generator"
+case_study   = "quay-ha"
+owner        = "nicholas.pecka"
