@@ -1,0 +1,21 @@
+# Example Terraform Variables for Minimal Single-AZ Deployment
+# Copy this file to terraform.tfvars and customize
+
+aws_region  = "us-east-1"
+environment = "threat-modeling"
+
+# VPC Configuration
+vpc_cidr = "10.0.0.0/16"
+
+# Database Configuration
+db_password = "insecure_password_123"  # T08: Weak password for demonstration
+
+# SSH Access
+# Generate a key pair: ssh-keygen -t rsa -b 4096 -f ~/.ssh/quay-minimal-key
+# Then paste the public key (~/.ssh/quay-minimal-key.pub) below
+ssh_public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC... your-key-here"
+
+# Tagging
+project_name = "threat-model-generator"
+case_study   = "quay-minimal"
+owner        = "nicholas.pecka"
