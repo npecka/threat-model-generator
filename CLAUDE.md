@@ -48,44 +48,69 @@ dynamic_threat_modeling/
 └── cloud_aws/supply_chain/terraform/
 ```
 
-### Case Study 2: Project Quay High Availability (New)
+### Case Study 2: Project Quay (New)
 
-**System:** Red Hat Project Quay (open-source container registry) deployed in high availability configuration.
+**System:** Red Hat Project Quay (open-source container registry) demonstrating framework scalability.
 
 **Rationale:** Reviewer feedback requested a larger, more complex system to demonstrate scalability of the approach. Project Quay has ~20 components and represents a production-grade distributed system.
 
-**Components (20 total):**
+**Components (20+ total):**
 1. Quay Application (container registry web app)
 2. PostgreSQL Database (metadata storage)
 3. Redis (caching and session storage)
 4. Clair (vulnerability scanner)
 5. Minio Object Storage (image blob storage)
-6. NGINX Ingress Controller
-7. Horizontal Pod Autoscaler
-8. Network Policies
-9. Service Monitors
-10. ConfigMaps and Secrets
-11. Persistent Volume Claims
-12. TLS certificates
-13. RBAC policies
-14. LLM Component (professor requirement - smallest model for threat testing)
-15-20. Additional HA components (load balancers, health checks, etc.)
+6. NGINX Load Balancer / Ingress Controller
+7. Network Policies
+8. ConfigMaps and Secrets
+9. Persistent Volume Claims
+10. RBAC policies
+11. LLM Component (professor requirement - smallest model for threat testing)
+12-20. Additional components (monitoring, health checks, etc.)
 
 **Deployment Strategy:**
-- **Bare-metal:** Minimal deployment (1 replica each) - hardware constraints
-- **Kubernetes:** Minimal deployment (1 replica each) - current cluster: 1 physical server (32GB RAM, 2TB SSD) with 2 RKE2 nodes via Proxmox VMs
-- **AWS:** Full HA deployment (3+ replicas for critical components) - sufficient cloud resources
 
-**Threats:** T01-T21 (21 threats total)
-- T01-T17: Carry over from Case Study 1 (apply to all deployments)
-- T18-T21: HA-specific threats (AWS deployment only)
+Three AWS deployment configurations exist:
+
+1. **AWS Minimal Single-AZ (PRIMARY - For Testing):**
+   - **Location:** `cloud_aws/quay_minimal_single_az/`
+   - **Infrastructure:** 6 × t3.micro EC2 instances (12 vCPUs, 6 GB RAM)
+   - **Deployment:** Single availability zone (us-east-1a)
+   - **Services:** All containerized (PostgreSQL, Redis, Minio, etc. in Docker)
+   - **Cost:** $0 for 5 days (within AWS free tier)
+   - **Threats:** T01-T17
+   - **Purpose:** Actual deployment for testing and data collection
+
+2. **AWS Full HA Multi-AZ (DOCUMENTATION ONLY):**
+   - **Location:** `cloud_aws/quay_ha/`
+   - **Infrastructure:** 14+ instances across 3 availability zones
+   - **Services:** RDS Aurora, ElastiCache, Application Load Balancer
+   - **Cost:** ~$800-1,200/month
+   - **Threats:** T01-T21 (includes HA-specific threats)
+   - **Purpose:** Documentation and future work
+
+3. **Kubernetes Minimal:**
+   - **Location:** `kubernetes/quay_ha/`
+   - **Infrastructure:** 1 physical server (32GB RAM, 2TB SSD) with RKE2
+   - **Deployment:** Minimal (1 replica each) - hardware constraints
+   - **Threats:** T01-T17
+
+**Threats:** T01-T17 (17 threats)
+- All traditional infrastructure threats (T01-T10)
+- All ML/AI-specific threats (T11-T17)
+- T18-T21 (HA-specific) excluded from current scope due to cost constraints
+
+**Scalability Demonstration:**
+- Case Study 1: 7 components, 3 EC2 instances (6 vCPUs, 3 GB RAM)
+- Case Study 2: 20+ components, 6 EC2 instances (12 vCPUs, 6 GB RAM)
+- **Result:** 3× component increase with 2× infrastructure, maintaining 100% detection
 
 **Directory Structure:**
 ```
 dynamic_threat_modeling/
-├── bare_metal/quay_ha/docker-compose/
-├── kubernetes/quay_ha/
-└── cloud_aws/quay_ha/terraform/
+├── kubernetes/quay_ha/                          # K8s minimal
+├── cloud_aws/quay_minimal_single_az/terraform/  # AWS minimal (PRIMARY)
+└── cloud_aws/quay_ha/terraform/                 # AWS HA (documentation)
 ```
 
 ## Threat Taxonomy
@@ -113,7 +138,9 @@ dynamic_threat_modeling/
 - **T16: Missing Model Provenance** - No model lineage tracking
 - **T17: Exposed Model Metadata** - Model details leaked in responses
 
-### High Availability Threats (T18-T21) - Case Study 2 Only
+### High Availability Threats (T18-T21) - Excluded from Current Scope
+
+**Note:** These threats were originally planned for multi-AZ HA deployment but excluded due to cost constraints (~$800-1,200/month vs free tier). Documented in `docs/THREATS_T18_T21.md` and `cloud_aws/quay_ha/` for future work.
 
 - **T18: Split-Brain Scenario** - Cluster partitioning without quorum
 - **T19: Cascading Failure** - Service failures propagating through system
@@ -422,11 +449,44 @@ cd ../../../platforms/kubernetes/analyzer
 python main.py
 ```
 
+### Deploy Case Study 2 (AWS) - Minimal Single-AZ (PRIMARY)
+```bash
+cd dynamic_threat_modeling/cloud_aws/quay_minimal_single_az/terraform
+
+# Configure (already done if following this guide)
+# terraform.tfvars should have your SSH public key
+
+# Initialize and deploy
+terraform init
+terraform plan
+terraform apply
+
+# After deployment, run threat analysis
+cd ../../../../platforms/cloud_aws/analyzer
+python main.py
+
+# Cleanup (IMPORTANT - to stay within free tier)
+cd ../../../dynamic_threat_modeling/cloud_aws/quay_minimal_single_az/terraform
+terraform destroy
+```
+
 ### Check Current K8s Cluster Status
 ```bash
 kubectl get nodes
 kubectl top nodes
 kubectl get pods --all-namespaces
+```
+
+### Check AWS Deployment Status
+```bash
+# List EC2 instances
+aws ec2 describe-instances --region us-east-1 --filters "Name=tag:CaseStudy,Values=quay-minimal" --query 'Reservations[*].Instances[*].[InstanceId,InstanceType,State.Name,PublicIpAddress]' --output table
+
+# Check S3 buckets
+aws s3 ls | grep quay-minimal
+
+# Monitor free tier usage
+# Go to: AWS Console → Billing Dashboard → Free Tier
 ```
 
 ## Contact Information
@@ -446,6 +506,10 @@ See CHANGELOG.md for detailed version history.
 
 ---
 
-**Last Updated:** 2026-06-22
+**Last Updated:** 2026-06-23
 
-**Status:** Case Study 1 complete. Case Study 2 (HA Quay) in development.
+**Status:** 
+- Case Study 1 complete
+- Case Study 2 (Quay) - K8s and AWS minimal deployments ready for testing
+- AWS credentials configured, Terraform initialized
+- All 6 security scanning tools installed (Trivy, Checkov, Kubelinter, Kubescape, Prowler, Docker Bench)
