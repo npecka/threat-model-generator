@@ -19,10 +19,6 @@ def get_ec2_instances(region='us-east-1'):
         response = ec2.describe_instances(
             Filters=[
                 {
-                    'Name': 'tag:Name',
-                    'Values': ['supply-chain-*']
-                },
-                {
                     'Name': 'instance-state-name',
                     'Values': ['running', 'pending']
                 }

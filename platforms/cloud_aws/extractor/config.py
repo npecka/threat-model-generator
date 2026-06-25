@@ -7,16 +7,16 @@ AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
 
 # EC2 Instance filter (tag-based)
 INSTANCE_TAG_FILTER = {
-    'Key': 'Project',
-    'Value': 'supply-chain-threat-model'
+    'Key': 'CaseStudy',
+    'Value': 'quay-minimal'
 }
 
 # Alternative: Filter by name pattern
-INSTANCE_NAME_PATTERN = 'supply-chain-*'
+INSTANCE_NAME_PATTERN = 'quay-minimal-*'
 
 # SSH Configuration (for accessing instances to collect app configs)
-SSH_USER = 'ubuntu'
-SSH_KEY_PATH = os.path.expanduser('~/.ssh/id_rsa')
+SSH_USER = 'ec2-user'
+SSH_KEY_PATH = os.path.expanduser('~/.ssh/quay-minimal-key')
 
 # Application service ports
 SERVICE_PORTS = {
