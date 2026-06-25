@@ -183,19 +183,39 @@ class AWSToolIntegrator:
                     })
 
         # T06: Cross-zone IAM access
+        # Check if any CI/CD instance uses a role with broad permissions
+        cicd_instance_profiles = set()
+        for instance in instances:
+            instance_name = instance.get("name", "").lower()
+            if any(keyword in instance_name for keyword in ["jenkins", "cicd", "gitlab", "github", "build", "deploy"]):
+                profile_arn = instance.get("iam_instance_profile", "")
+                if profile_arn:
+                    cicd_instance_profiles.add(profile_arn)
+                    # Also add just the profile name (last part of ARN)
+                    if '/' in profile_arn:
+                        profile_name = profile_arn.split('/')[-1]
+                        cicd_instance_profiles.add(profile_name)
+
         for role in iam_roles:
             role_name = role.get("name", "").lower()
-            if "jenkins" in role_name or "cicd" in role_name or "dev" in role_name:
+            instance_profile = role.get("instance_profile", "")
+
+            # Check if this role is used by CI/CD instances OR has CI/CD-related name
+            is_cicd_role = (any(keyword in role_name for keyword in ["jenkins", "cicd", "gitlab", "deploy"]) or
+                           instance_profile in cicd_instance_profiles)
+
+            if is_cicd_role:
                 all_policies = role.get("inline_policies", []) + role.get("policies", [])
                 for policy in all_policies:
                     policy_str = str(policy).lower()
-                    if "ec2:*" in policy_str or "s3:*" in policy_str:
+                    if "ec2:*" in policy_str or "s3:*" in policy_str or "ec2:describe" in policy_str:
                         detected_threats.add("T06")
                         findings.append({
-                            "issue": f"CI/CD role {role_name} has broad resource access",
+                            "issue": f"CI/CD role {role_name} has broad resource access (used by CI/CD instance)",
                             "severity": "HIGH",
                             "resource": role_name
                         })
+                        break
 
         # T07: Missing CloudTrail/VPC Flow Logs
         cloudtrail_enabled = metadata.get("cloudtrail_enabled", False)
