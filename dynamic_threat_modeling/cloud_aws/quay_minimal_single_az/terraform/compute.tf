@@ -235,6 +235,34 @@ resource "aws_instance" "loadbalancer" {
   }
 }
 
+# T06: Jenkins CI/CD Instance with production access
+# EC2 Instance 7: Jenkins CI/CD
+resource "aws_instance" "jenkins_cicd" {
+  ami                    = data.aws_ami.amazon_linux_2.id
+  instance_type          = "t3.micro"
+  subnet_id              = aws_subnet.public.id
+  vpc_security_group_ids = [aws_security_group.quay_instances.id]
+  iam_instance_profile   = aws_iam_instance_profile.quay_profile.name
+  key_name               = aws_key_pair.quay_key.key_name
+
+  # T06: CI/CD system has access to production resources (S3, EC2)
+  # T08: Secrets in user-data
+  user_data = templatefile("${path.module}/user-data/jenkins.sh", {})
+
+  root_block_device {
+    volume_size = 30
+    volume_type = "gp3"
+  }
+
+  # T10: No detailed monitoring
+  monitoring = false
+
+  tags = {
+    Name = "jenkins-cicd"
+    Role = "cicd"
+  }
+}
+
 # Outputs
 output "instance_summary" {
   description = "Summary of all EC2 instances"
@@ -263,6 +291,10 @@ output "instance_summary" {
       public_ip  = aws_instance.loadbalancer.public_ip
       private_ip = aws_instance.loadbalancer.private_ip
     }
+    jenkins_cicd = {
+      public_ip  = aws_instance.jenkins_cicd.public_ip
+      private_ip = aws_instance.jenkins_cicd.private_ip
+    }
   }
 }
 
@@ -274,9 +306,9 @@ output "quay_url" {
 output "deployment_stats" {
   description = "Deployment statistics"
   value = {
-    total_instances = 6
-    total_vcpus     = 12
-    total_memory_gb = 6
+    total_instances = 7
+    total_vcpus     = 14
+    total_memory_gb = 7
     instance_type   = "t3.micro"
     components      = "20+"
     threats         = "T01-T17"

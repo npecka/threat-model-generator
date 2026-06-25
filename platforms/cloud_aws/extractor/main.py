@@ -19,6 +19,7 @@ from ec2_fetcher import (
     get_ec2_instances,
     get_security_groups,
     get_iam_roles,
+    get_iam_users,
     get_vpc_details
 )
 from config_fetcher import collect_instance_configs, get_docker_info
@@ -66,6 +67,12 @@ def main():
     iam_roles = get_iam_roles(AWS_REGION, profile_arns)
     metrics.end_phase("iam_roles_collection")
 
+    # Collect IAM Users
+    print("\nCollecting IAM users...")
+    metrics.start_phase("iam_users_collection")
+    iam_users = get_iam_users(AWS_REGION)
+    metrics.end_phase("iam_users_collection")
+
     # Collect VPC details
     print("\nCollecting VPC configuration...")
     metrics.start_phase("vpc_collection")
@@ -83,6 +90,13 @@ def main():
     metrics.end_phase("config_files_collection")
 
     print(f"\n✓ Collected {len(all_configs)} config files")
+
+    # Collect S3 buckets
+    print("\nCollecting S3 buckets...")
+    metrics.start_phase("s3_buckets_collection")
+    from ec2_fetcher import get_s3_buckets
+    s3_buckets = get_s3_buckets(AWS_REGION)
+    metrics.end_phase("s3_buckets_collection")
 
     # Collect Docker info from each instance
     print("\nCollecting Docker information...")
@@ -103,12 +117,16 @@ def main():
         'instances': instances,
         'security_groups': security_groups,
         'iam_roles': iam_roles,
+        'iam_users': iam_users,
         'vpc': vpc,
+        's3_buckets': s3_buckets,
         'configs': all_configs,
         'summary': {
             'instances_count': len(instances),
             'security_groups_count': len(security_groups),
             'iam_roles_count': len(iam_roles),
+            'iam_users_count': len(iam_users),
+            's3_buckets_count': len(s3_buckets),
             'config_files_count': len(all_configs),
         }
     }

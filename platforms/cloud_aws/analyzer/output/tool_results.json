@@ -1,0 +1,281 @@
+{
+  "tools": {
+    "prowler": {
+      "tool": "static_analysis",
+      "total_findings": 42,
+      "by_severity": {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "MEDIUM": 0,
+        "LOW": 0
+      },
+      "detected_ground_truth": [
+        "T01",
+        "T02",
+        "T03",
+        "T04",
+        "T05",
+        "T07",
+        "T08",
+        "T10",
+        "T11",
+        "T12",
+        "T13",
+        "T14",
+        "T15",
+        "T16",
+        "T17"
+      ],
+      "findings": [
+        {
+          "issue": "Security group quay-instances-sg allows public access",
+          "severity": "CRITICAL",
+          "resource": "quay-instances-sg"
+        },
+        {
+          "issue": "Security group quay-instances-sg allows public access",
+          "severity": "CRITICAL",
+          "resource": "quay-instances-sg"
+        },
+        {
+          "issue": "Security group quay-instances-sg allows public access",
+          "severity": "CRITICAL",
+          "resource": "quay-instances-sg"
+        },
+        {
+          "issue": "Security group quay-instances-sg allows public access",
+          "severity": "CRITICAL",
+          "resource": "quay-instances-sg"
+        },
+        {
+          "issue": "IAM role quay-minimal-instance-role has wildcard permissions",
+          "severity": "HIGH",
+          "resource": "quay-minimal-instance-role"
+        },
+        {
+          "issue": "IAM role quay-minimal-instance-role has wildcard permissions",
+          "severity": "HIGH",
+          "resource": "quay-minimal-instance-role"
+        },
+        {
+          "issue": "Instance i-0dc283386dcb9b137 missing version tag",
+          "severity": "MEDIUM",
+          "resource": "i-0dc283386dcb9b137"
+        },
+        {
+          "issue": "Instance i-0f4d142160f092609 missing version tag",
+          "severity": "MEDIUM",
+          "resource": "i-0f4d142160f092609"
+        },
+        {
+          "issue": "Instance i-0706bb2288d0bab3e missing version tag",
+          "severity": "MEDIUM",
+          "resource": "i-0706bb2288d0bab3e"
+        },
+        {
+          "issue": "Instance i-0efa9d5983de756f7 missing version tag",
+          "severity": "MEDIUM",
+          "resource": "i-0efa9d5983de756f7"
+        },
+        {
+          "issue": "Instance i-022b701dc4114e14e missing version tag",
+          "severity": "MEDIUM",
+          "resource": "i-022b701dc4114e14e"
+        },
+        {
+          "issue": "Instance i-08ccd34fe02fd2c29 missing version tag",
+          "severity": "MEDIUM",
+          "resource": "i-08ccd34fe02fd2c29"
+        },
+        {
+          "issue": "Security group quay-instances-sg allows broad network access (10.0.0.0/16)",
+          "severity": "MEDIUM",
+          "resource": "quay-instances-sg"
+        },
+        {
+          "issue": "Security group quay-instances-sg allows unencrypted port 80",
+          "severity": "HIGH",
+          "resource": "quay-instances-sg"
+        },
+        {
+          "issue": "Security group quay-instances-sg allows unencrypted port 8080",
+          "severity": "HIGH",
+          "resource": "quay-instances-sg"
+        },
+        {
+          "issue": "Missing logging: CloudTrail, VPC Flow Logs",
+          "severity": "HIGH",
+          "resource": "Account"
+        },
+        {
+          "issue": "Instance i-0dc283386dcb9b137 may have secrets in user-data",
+          "severity": "CRITICAL",
+          "resource": "i-0dc283386dcb9b137"
+        },
+        {
+          "issue": "Instance i-0efa9d5983de756f7 may have secrets in user-data",
+          "severity": "CRITICAL",
+          "resource": "i-0efa9d5983de756f7"
+        },
+        {
+          "issue": "Instance i-022b701dc4114e14e may have secrets in user-data",
+          "severity": "CRITICAL",
+          "resource": "i-022b701dc4114e14e"
+        },
+        {
+          "issue": "Instance i-08ccd34fe02fd2c29 may have secrets in user-data",
+          "severity": "CRITICAL",
+          "resource": "i-08ccd34fe02fd2c29"
+        },
+        {
+          "issue": "Burstable instance i-0dc283386dcb9b137 may lack resource monitoring",
+          "severity": "LOW",
+          "resource": "i-0dc283386dcb9b137"
+        },
+        {
+          "issue": "Burstable instance i-0f4d142160f092609 may lack resource monitoring",
+          "severity": "LOW",
+          "resource": "i-0f4d142160f092609"
+        },
+        {
+          "issue": "Burstable instance i-0706bb2288d0bab3e may lack resource monitoring",
+          "severity": "LOW",
+          "resource": "i-0706bb2288d0bab3e"
+        },
+        {
+          "issue": "Burstable instance i-0efa9d5983de756f7 may lack resource monitoring",
+          "severity": "LOW",
+          "resource": "i-0efa9d5983de756f7"
+        },
+        {
+          "issue": "Burstable instance i-022b701dc4114e14e may lack resource monitoring",
+          "severity": "LOW",
+          "resource": "i-022b701dc4114e14e"
+        },
+        {
+          "issue": "Burstable instance i-08ccd34fe02fd2c29 may lack resource monitoring",
+          "severity": "LOW",
+          "resource": "i-08ccd34fe02fd2c29"
+        },
+        {
+          "issue": "ML service llm-service exposed without authentication",
+          "severity": "CRITICAL",
+          "resource": "llm-service"
+        },
+        {
+          "issue": "ML service llm-service exposed without authentication",
+          "severity": "CRITICAL",
+          "resource": "llm-service"
+        },
+        {
+          "issue": "Training data service database-cache may lack validation",
+          "severity": "HIGH",
+          "resource": "database-cache"
+        },
+        {
+          "issue": "ML inference API llm-service allows unrestricted access",
+          "severity": "HIGH",
+          "resource": "llm-service"
+        },
+        {
+          "issue": "ML inference API llm-service allows unrestricted access",
+          "severity": "HIGH",
+          "resource": "llm-service"
+        },
+        {
+          "issue": "ML inference API llm-service allows unrestricted access",
+          "severity": "HIGH",
+          "resource": "llm-service"
+        },
+        {
+          "issue": "ML inference API llm-service allows unrestricted access",
+          "severity": "HIGH",
+          "resource": "llm-service"
+        },
+        {
+          "issue": "Instance llm-service downloads models over HTTP",
+          "severity": "MEDIUM",
+          "resource": "llm-service"
+        },
+        {
+          "issue": "ML service role quay-minimal-instance-role has broad resource access",
+          "severity": "HIGH",
+          "resource": "quay-minimal-instance-role"
+        },
+        {
+          "issue": "ML service role quay-minimal-instance-role has broad resource access",
+          "severity": "HIGH",
+          "resource": "quay-minimal-instance-role"
+        },
+        {
+          "issue": "ML service llm-service lacks model provenance tracking",
+          "severity": "MEDIUM",
+          "resource": "llm-service"
+        },
+        {
+          "issue": "Instance llm-service exposes model metadata in configuration",
+          "severity": "LOW",
+          "resource": "llm-service"
+        },
+        {
+          "issue": "Container registry storage-scanner allows anonymous access",
+          "severity": "CRITICAL",
+          "resource": "storage-scanner"
+        },
+        {
+          "issue": "Container registry quay-app-2 allows anonymous access",
+          "severity": "CRITICAL",
+          "resource": "quay-app-2"
+        },
+        {
+          "issue": "Container registry quay-app-1 allows anonymous access",
+          "severity": "CRITICAL",
+          "resource": "quay-app-1"
+        },
+        {
+          "issue": "S3 bucket quay-minimal-storage-b8clj253 allows public access",
+          "severity": "CRITICAL",
+          "resource": "quay-minimal-storage-b8clj253"
+        }
+      ]
+    },
+    "checkov": {
+      "tool": "checkov",
+      "total_findings": 3,
+      "by_severity": {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "MEDIUM": 0,
+        "LOW": 0
+      },
+      "detected_ground_truth": [
+        "T01",
+        "T03",
+        "T07"
+      ],
+      "findings": []
+    }
+  },
+  "combined_detection": [
+    "T01",
+    "T02",
+    "T03",
+    "T04",
+    "T05",
+    "T07",
+    "T08",
+    "T10",
+    "T11",
+    "T12",
+    "T13",
+    "T14",
+    "T15",
+    "T16",
+    "T17"
+  ],
+  "detection_summary": {
+    "total_threats": 17,
+    "detected": 15,
+    "detection_rate": 0.8823529411764706
+  }
+}

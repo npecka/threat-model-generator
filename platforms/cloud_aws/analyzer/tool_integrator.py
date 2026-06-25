@@ -117,7 +117,9 @@ class AWSToolIntegrator:
         # T02: Overly permissive IAM policies
         for role in iam_roles:
             role_name = role.get("name", "unknown")
-            for policy in role.get("policies", []):
+            # Check both inline_policies and policies (different extractors may use different keys)
+            all_policies = role.get("inline_policies", []) + role.get("policies", [])
+            for policy in all_policies:
                 policy_doc = policy.get("document", {})
                 for statement in policy_doc.get("Statement", []):
                     actions = statement.get("Action", [])
@@ -150,14 +152,22 @@ class AWSToolIntegrator:
             sg_name = sg.get("name", sg.get("id", "unknown"))
             for rule in sg.get("ingress_rules", []):
                 for cidr in rule.get("cidr_blocks", []):
-                    # Check for VPC-wide access
-                    if any(cidr.startswith(prefix) for prefix in ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]):
-                        detected_threats.add("T04")
-                        findings.append({
-                            "issue": f"Security group {sg_name} allows broad network access ({cidr})",
-                            "severity": "MEDIUM",
-                            "resource": sg_name
-                        })
+                    # Check for VPC-wide or overly broad private network access
+                    # Examples: 10.0.0.0/16, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16
+                    if (cidr.startswith("10.") or cidr.startswith("172.") or cidr.startswith("192.168.")) and cidr != "0.0.0.0/0":
+                        # Extract prefix length
+                        try:
+                            prefix_len = int(cidr.split('/')[1]) if '/' in cidr else 32
+                            # Flag if /16 or broader (allows many hosts)
+                            if prefix_len <= 16:
+                                detected_threats.add("T04")
+                                findings.append({
+                                    "issue": f"Security group {sg_name} allows broad network access ({cidr})",
+                                    "severity": "MEDIUM",
+                                    "resource": sg_name
+                                })
+                        except:
+                            pass
 
         # T03: Unencrypted communication (HTTP/unencrypted ports)
         for sg in security_groups:
@@ -176,7 +186,8 @@ class AWSToolIntegrator:
         for role in iam_roles:
             role_name = role.get("name", "").lower()
             if "jenkins" in role_name or "cicd" in role_name or "dev" in role_name:
-                for policy in role.get("policies", []):
+                all_policies = role.get("inline_policies", []) + role.get("policies", [])
+                for policy in all_policies:
                     policy_str = str(policy).lower()
                     if "ec2:*" in policy_str or "s3:*" in policy_str:
                         detected_threats.add("T06")
@@ -304,11 +315,33 @@ class AWSToolIntegrator:
                     })
 
         # T15: ML Pipeline to Production Access - ML services with excessive permissions
+        # Check if any ML instance uses a role with excessive permissions
+        ml_instance_profiles = set()
+        for instance in instances:
+            instance_name = instance.get("name", "").lower()
+            if any(keyword in instance_name for keyword in ["llm", "ml", "training", "inference"]):
+                profile_arn = instance.get("iam_instance_profile", "")
+                if profile_arn:
+                    ml_instance_profiles.add(profile_arn)
+                    # Also add just the profile name (last part of ARN)
+                    if '/' in profile_arn:
+                        profile_name = profile_arn.split('/')[-1]
+                        ml_instance_profiles.add(profile_name)
+
         for role in iam_roles:
             role_name = role.get("name", "").lower()
-            if any(keyword in role_name for keyword in ["llm", "ml", "training", "inference"]):
+            role_arn = role.get("arn", "")
+            instance_profile = role.get("instance_profile", "")
+
+            # Check if this role is used by ML instances OR has ML-related name
+            is_ml_role = (any(keyword in role_name for keyword in ["llm", "ml", "training", "inference"]) or
+                         instance_profile in ml_instance_profiles or
+                         role_arn in ml_instance_profiles)
+
+            if is_ml_role:
                 # Check if ML service has production-level permissions
-                for policy in role.get("policies", []):
+                all_policies = role.get("inline_policies", []) + role.get("policies", [])
+                for policy in all_policies:
                     policy_doc = policy.get("document", {})
                     for statement in policy_doc.get("Statement", []):
                         resources = statement.get("Resource", [])
@@ -321,6 +354,7 @@ class AWSToolIntegrator:
                                 "severity": "HIGH",
                                 "resource": role_name
                             })
+                            break
 
         # T16: Missing Model Provenance - No model lineage tracking
         for instance in instances:
@@ -341,8 +375,13 @@ class AWSToolIntegrator:
             instance_name = instance.get("name", "").lower()
             user_data = instance.get("user_data", "")
             if any(keyword in instance_name for keyword in ["llm", "ml", "model"]):
-                # Check for model metadata exposure in user-data
-                if any(keyword in user_data.lower() for keyword in ["model_name=", "model_path=", "model_config="]):
+                # Check for model metadata exposure in user-data (various formats)
+                metadata_patterns = [
+                    "model_name", "model_path", "model_config",
+                    "model-info", "quantization", "download_url",
+                    "context_length", "parameters"
+                ]
+                if any(pattern in user_data.lower() for pattern in metadata_patterns):
                     detected_threats.add("T17")
                     findings.append({
                         "issue": f"Instance {instance_name} exposes model metadata in configuration",

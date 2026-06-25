@@ -12,25 +12,13 @@ Internet = Process(name='Internet', boundary=externalBoundary)
 Internet.description = 'External world (public internet)'
 Internet.inBoundary = externalBoundary
 
-subnet_0aade118bfb3dac8a = Boundary('subnet-0aade118bfb3dac8a')
-subnet_0fcd5fb7c57e09f78 = Boundary('subnet-0fcd5fb7c57e09f78')
-subnet_069c9c3717f54b465 = Boundary('subnet-069c9c3717f54b465')
+storage_scanner = Boundary('storage-scanner')
+llm_service = Boundary('llm-service')
+loadbalancer = Boundary('loadbalancer')
+database_cache = Boundary('database-cache')
+quay_app_2 = Boundary('quay-app-2')
+quay_app_1 = Boundary('quay-app-1')
 
-registry = Datastore(name='registry', boundary=subnet_0aade118bfb3dac8a)
-registry.description = 'registry in subnet-0aade118bfb3dac8a'
-registry.inBoundary = subnet_0aade118bfb3dac8a
-jenkins = Process(name='jenkins', boundary=subnet_0aade118bfb3dac8a)
-jenkins.description = 'jenkins in subnet-0aade118bfb3dac8a'
-jenkins.inBoundary = subnet_0aade118bfb3dac8a
-gitea = Process(name='gitea', boundary=subnet_0fcd5fb7c57e09f78)
-gitea.description = 'gitea in subnet-0fcd5fb7c57e09f78'
-gitea.inBoundary = subnet_0fcd5fb7c57e09f78
-application = Process(name='application', boundary=subnet_069c9c3717f54b465)
-application.description = 'application in subnet-069c9c3717f54b465'
-application.inBoundary = subnet_069c9c3717f54b465
-postgres = Datastore(name='postgres', boundary=subnet_069c9c3717f54b465)
-postgres.description = 'postgres in subnet-069c9c3717f54b465'
-postgres.inBoundary = subnet_069c9c3717f54b465
 
 
 # =========================================================================
@@ -42,9 +30,19 @@ postgres.inBoundary = subnet_069c9c3717f54b465
 Threat(
     SID='T01',
     target=('Process', 'Datastore', 'Dataflow'),
-    description='T01: Validation=CONFIRMED, Confidence=MEDIUM',
-    details='Static: checkov | Runtime: CONFIRMED',
-    severity='CRITICAL',
+    description='T01: Validation=POTENTIAL, Confidence=LOW',
+    details='Static: checkov | Runtime: POTENTIAL',
+    severity='HIGH',
+    condition='True'  # Confidence: LOW
+)
+
+# T02: Multi-Modal Correlated Threat
+Threat(
+    SID='T02',
+    target=('Process', 'Datastore', 'Dataflow'),
+    description='T02: Validation=POTENTIAL, Confidence=MEDIUM',
+    details='Static:  | Runtime: POTENTIAL',
+    severity='HIGH',
     condition='True'  # Confidence: MEDIUM
 )
 
@@ -52,10 +50,20 @@ Threat(
 Threat(
     SID='T03',
     target=('Process', 'Datastore', 'Dataflow'),
-    description='T03: Validation=CONFIRMED, Confidence=HIGH',
-    details='Static: checkov | Runtime: CONFIRMED',
-    severity='CRITICAL',
-    condition='True'  # Confidence: HIGH
+    description='T03: Validation=POTENTIAL, Confidence=LOW',
+    details='Static: checkov | Runtime: POTENTIAL',
+    severity='HIGH',
+    condition='True'  # Confidence: LOW
+)
+
+# T04: Multi-Modal Correlated Threat
+Threat(
+    SID='T04',
+    target=('Process', 'Datastore', 'Dataflow'),
+    description='T04: Validation=POTENTIAL, Confidence=MEDIUM',
+    details='Static:  | Runtime: POTENTIAL',
+    severity='HIGH',
+    condition='True'  # Confidence: MEDIUM
 )
 
 # T05: Multi-Modal Correlated Threat
@@ -78,6 +86,16 @@ Threat(
     condition='True'  # Confidence: MEDIUM
 )
 
+# T08: Multi-Modal Correlated Threat
+Threat(
+    SID='T08',
+    target=('Process', 'Datastore', 'Dataflow'),
+    description='T08: Validation=CONFIRMED, Confidence=HIGH',
+    details='Static:  | Runtime: CONFIRMED',
+    severity='CRITICAL',
+    condition='True'  # Confidence: HIGH
+)
+
 # T10: Multi-Modal Correlated Threat
 Threat(
     SID='T10',
@@ -88,19 +106,95 @@ Threat(
     condition='True'  # Confidence: MEDIUM
 )
 
+# T11: Multi-Modal Correlated Threat
+Threat(
+    SID='T11',
+    target=('Process', 'Datastore', 'Dataflow'),
+    description='T11: Validation=NO_VALIDATION, Confidence=MEDIUM',
+    details='Static:  | Runtime: NO_VALIDATION',
+    severity='MEDIUM',
+    condition='True'  # Confidence: MEDIUM
+)
+
+# T12: Multi-Modal Correlated Threat
+Threat(
+    SID='T12',
+    target=('Process', 'Datastore', 'Dataflow'),
+    description='T12: Validation=NO_VALIDATION, Confidence=MEDIUM',
+    details='Static:  | Runtime: NO_VALIDATION',
+    severity='MEDIUM',
+    condition='True'  # Confidence: MEDIUM
+)
+
+# T13: Multi-Modal Correlated Threat
+Threat(
+    SID='T13',
+    target=('Process', 'Datastore', 'Dataflow'),
+    description='T13: Validation=NO_VALIDATION, Confidence=MEDIUM',
+    details='Static:  | Runtime: NO_VALIDATION',
+    severity='MEDIUM',
+    condition='True'  # Confidence: MEDIUM
+)
+
+# T14: Multi-Modal Correlated Threat
+Threat(
+    SID='T14',
+    target=('Process', 'Datastore', 'Dataflow'),
+    description='T14: Validation=NO_VALIDATION, Confidence=MEDIUM',
+    details='Static:  | Runtime: NO_VALIDATION',
+    severity='MEDIUM',
+    condition='True'  # Confidence: MEDIUM
+)
+
+# T15: Multi-Modal Correlated Threat
+Threat(
+    SID='T15',
+    target=('Process', 'Datastore', 'Dataflow'),
+    description='T15: Validation=NO_VALIDATION, Confidence=MEDIUM',
+    details='Static:  | Runtime: NO_VALIDATION',
+    severity='MEDIUM',
+    condition='True'  # Confidence: MEDIUM
+)
+
+# T16: Multi-Modal Correlated Threat
+Threat(
+    SID='T16',
+    target=('Process', 'Datastore', 'Dataflow'),
+    description='T16: Validation=NO_VALIDATION, Confidence=MEDIUM',
+    details='Static:  | Runtime: NO_VALIDATION',
+    severity='MEDIUM',
+    condition='True'  # Confidence: MEDIUM
+)
+
+# T17: Multi-Modal Correlated Threat
+Threat(
+    SID='T17',
+    target=('Process', 'Datastore', 'Dataflow'),
+    description='T17: Validation=NO_VALIDATION, Confidence=MEDIUM',
+    details='Static:  | Runtime: NO_VALIDATION',
+    severity='MEDIUM',
+    condition='True'  # Confidence: MEDIUM
+)
+
 
 # Annotate elements with detected threats
-# Total threats detected: 5
-registry.totalThreatsDetected = 5
-registry.riskLevel = 'Critical'
-
 
 # --- CORRELATED: Multi-Modal Validated Threats ---
-# T01 (CONFIRMED, MEDIUM confidence)
-# T03 (CONFIRMED, HIGH confidence)
+# T01 (POTENTIAL, LOW confidence)
+# T02 (POTENTIAL, MEDIUM confidence)
+# T03 (POTENTIAL, LOW confidence)
+# T04 (POTENTIAL, MEDIUM confidence)
 # T05 (UNVALIDATED, MEDIUM confidence)
 # T07 (UNVALIDATED, MEDIUM confidence)
+# T08 (CONFIRMED, HIGH confidence)
 # T10 (UNVALIDATED, MEDIUM confidence)
+# T11 (NO_VALIDATION, MEDIUM confidence)
+# T12 (NO_VALIDATION, MEDIUM confidence)
+# T13 (NO_VALIDATION, MEDIUM confidence)
+# T14 (NO_VALIDATION, MEDIUM confidence)
+# T15 (NO_VALIDATION, MEDIUM confidence)
+# T16 (NO_VALIDATION, MEDIUM confidence)
+# T17 (NO_VALIDATION, MEDIUM confidence)
 
 # Process the threat model (generates STRIDE + custom threats)
 tm.process()

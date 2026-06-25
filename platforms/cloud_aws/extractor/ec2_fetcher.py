@@ -36,7 +36,7 @@ def get_ec2_instances(region='us-east-1'):
                     elif tag['Key'] == 'Zone':
                         zone = tag['Value']
 
-                instances.append({
+                instance_data = {
                     'id': instance['InstanceId'],
                     'name': name,
                     'zone': zone,
@@ -49,7 +49,26 @@ def get_ec2_instances(region='us-east-1'):
                     'iam_instance_profile': instance.get('IamInstanceProfile', {}).get('Arn', ''),
                     'state': instance['State']['Name'],
                     'launch_time': instance.get('LaunchTime', '').isoformat() if instance.get('LaunchTime') else '',
-                })
+                    'user_data': '',
+                    'tags': {tag['Key']: tag['Value'] for tag in instance.get('Tags', [])}
+                }
+
+                # Fetch user-data separately (requires additional API call)
+                try:
+                    user_data_response = ec2.describe_instance_attribute(
+                        InstanceId=instance['InstanceId'],
+                        Attribute='userData'
+                    )
+                    if 'UserData' in user_data_response and 'Value' in user_data_response['UserData']:
+                        import base64
+                        user_data_b64 = user_data_response['UserData']['Value']
+                        user_data_decoded = base64.b64decode(user_data_b64).decode('utf-8', errors='ignore')
+                        instance_data['user_data'] = user_data_decoded
+                except Exception as e:
+                    # User-data may not exist or may not be accessible
+                    pass
+
+                instances.append(instance_data)
 
         print(f"  ✓ Found {len(instances)} EC2 instances")
 
@@ -175,6 +194,137 @@ def get_iam_roles(region='us-east-1', instance_profile_arns=None):
         print(f"  ✗ Error fetching IAM roles: {e}")
 
     return roles
+
+
+def get_s3_buckets(region='us-east-1'):
+    """Get S3 bucket details including public access settings"""
+    s3 = boto3.client('s3', region_name=region)
+
+    buckets = []
+
+    try:
+        # List all buckets
+        response = s3.list_buckets()
+
+        for bucket in response.get('Buckets', []):
+            bucket_name = bucket['Name']
+
+            bucket_info = {
+                'name': bucket_name,
+                'creation_date': bucket.get('CreationDate', '').isoformat() if bucket.get('CreationDate') else '',
+                'public_access_block': {},
+                'policy': None,
+            }
+
+            # Get public access block configuration
+            try:
+                pub_access = s3.get_public_access_block(Bucket=bucket_name)
+                if 'PublicAccessBlockConfiguration' in pub_access:
+                    bucket_info['public_access_block'] = pub_access['PublicAccessBlockConfiguration']
+            except:
+                # No public access block configured (means it might be public)
+                bucket_info['public_access_block'] = {
+                    'block_public_acls': False,
+                    'block_public_policy': False,
+                    'ignore_public_acls': False,
+                    'restrict_public_buckets': False
+                }
+
+            # Get bucket policy
+            try:
+                policy_response = s3.get_bucket_policy(Bucket=bucket_name)
+                if 'Policy' in policy_response:
+                    import json
+                    bucket_info['policy'] = json.loads(policy_response['Policy'])
+            except:
+                # No bucket policy
+                pass
+
+            buckets.append(bucket_info)
+
+        print(f"  ✓ Collected {len(buckets)} S3 buckets")
+
+    except Exception as e:
+        print(f"  ✗ Error fetching S3 buckets: {e}")
+
+    return buckets
+
+
+def get_iam_users(region='us-east-1'):
+    """Get IAM user details including MFA status"""
+    iam = boto3.client('iam', region_name=region)
+
+    users = []
+
+    try:
+        # List all IAM users
+        response = iam.list_users()
+
+        for user in response.get('Users', []):
+            user_name = user['UserName']
+
+            user_info = {
+                'name': user_name,
+                'arn': user.get('Arn', ''),
+                'user_id': user.get('UserId', ''),
+                'create_date': user.get('CreateDate', '').isoformat() if user.get('CreateDate') else '',
+                'password_last_used': user.get('PasswordLastUsed', '').isoformat() if user.get('PasswordLastUsed') else '',
+                'mfa_enabled': False,
+                'mfa_devices': [],
+                'access_keys': [],
+                'attached_policies': []
+            }
+
+            # Check MFA devices
+            try:
+                mfa_response = iam.list_mfa_devices(UserName=user_name)
+                mfa_devices = mfa_response.get('MFADevices', [])
+                user_info['mfa_devices'] = [
+                    {
+                        'serial_number': device.get('SerialNumber', ''),
+                        'enable_date': device.get('EnableDate', '').isoformat() if device.get('EnableDate') else ''
+                    }
+                    for device in mfa_devices
+                ]
+                user_info['mfa_enabled'] = len(mfa_devices) > 0
+            except:
+                pass
+
+            # Get access keys
+            try:
+                keys_response = iam.list_access_keys(UserName=user_name)
+                user_info['access_keys'] = [
+                    {
+                        'access_key_id': key.get('AccessKeyId', ''),
+                        'status': key.get('Status', ''),
+                        'create_date': key.get('CreateDate', '').isoformat() if key.get('CreateDate') else ''
+                    }
+                    for key in keys_response.get('AccessKeyMetadata', [])
+                ]
+            except:
+                pass
+
+            # Get attached policies
+            try:
+                policies_response = iam.list_attached_user_policies(UserName=user_name)
+                user_info['attached_policies'] = [
+                    {
+                        'policy_name': policy.get('PolicyName', ''),
+                        'policy_arn': policy.get('PolicyArn', '')
+                    }
+                    for policy in policies_response.get('AttachedPolicies', [])
+                ]
+            except:
+                pass
+
+            users.append(user_info)
+
+        print(f"  ✓ Collected {len(users)} IAM users")
+
+    except Exception as e:
+        print(f"  ✗ Error fetching IAM users: {e}")
+
+    return users
 
 
 def get_vpc_details(region='us-east-1', vpc_id=None):
