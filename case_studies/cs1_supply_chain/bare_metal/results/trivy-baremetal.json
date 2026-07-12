@@ -1,0 +1,7 @@
+{
+  "SchemaVersion": 2,
+  "ReportID": "019afb25-7f23-724f-a626-0a52953d4aa3",
+  "CreatedAt": "2025-12-07T17:28:49.955155141-06:00",
+  "ArtifactName": "case_studies/bare_metal/supply_chain/docker-compose",
+  "ArtifactType": "filesystem"
+}

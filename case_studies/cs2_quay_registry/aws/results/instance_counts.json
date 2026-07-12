@@ -1,0 +1,27 @@
+{
+  "platform": "AWS",
+  "case_study": 7,
+  "threat_types_detected": 17,
+  "traditional_instances": 36,
+  "ml_instances": 11,
+  "total_instances": 47,
+  "by_type": {
+    "T01": 4,
+    "T02": 1,
+    "T03": 11,
+    "T04": 1,
+    "T05": 2,
+    "T06": 1,
+    "T07": 3,
+    "T08": 3,
+    "T09": 4,
+    "T10": 6,
+    "T11": 2,
+    "T12": 3,
+    "T13": 2,
+    "T14": 1,
+    "T15": 1,
+    "T16": 1,
+    "T17": 1
+  }
+}

@@ -10,43 +10,80 @@ This framework detects architectural security threats across three deployment pa
 - **AWS Cloud** - EC2-based cloud deployments
 
 **Key Features:**
-- 100% detection of 17 threat types (T01-T17) including ML/AI-specific threats
+- 100% detection of 17 threat types (T01-T17) including ML/AI-specific threat types
 - Platform-agnostic threat taxonomy
 - Runtime-aware analysis combining static and dynamic data
 - Integration with 6 security scanning tools (Trivy, Checkov, Kubelinter, Kubescape, Prowler, Docker Bench)
 - Zero false positives through runtime flow confirmation
+- Validated across two case studies at different scales
 
 ## Repository Structure
 
 ```
 threat-model-generator/
 │
-├── dynamic_threat_modeling/          # Deployment configurations
-│   ├── bare_metal/                   # VM + Docker deployments
-│   ├── cloud_aws/                    # AWS EC2 + Terraform
-│   ├── kubernetes/                   # K8s manifests
-│   └── ground_truth/                 # Reference architectures
+├── case_studies/                        # Experimental results
+│   ├── cs1_supply_chain/                # Case Study 1: 8-component supply chain
+│   │   ├── bare_metal/results/          # Bare-metal detection results
+│   │   ├── kubernetes/results/          # Kubernetes detection results
+│   │   └── aws/results/                 # AWS detection results
+│   └── cs2_quay_registry/              # Case Study 2: 20-component container registry
+│       └── aws/results/                 # AWS detection results
 │
-├── platforms/                        # Analysis tooling
+├── dynamic_threat_modeling/             # Deployment configurations
+│   ├── bare_metal/                      # VM + Docker deployments
+│   ├── cloud_aws/                       # AWS EC2 + Terraform
+│   │   ├── supply_chain/                # CS1 AWS deployment
+│   │   └── quay_minimal_single_az/      # CS2 AWS deployment
+│   ├── kubernetes/                      # K8s manifests
+│   └── ground_truth/                    # Reference architectures
+│
+├── platforms/                           # Analysis tooling
 │   ├── bare_metal/
-│   │   ├── analyzer/                 # Threat detection engine
-│   │   └── extractor/                # Data collection
+│   │   ├── analyzer/                    # Threat detection engine
+│   │   └── extractor/                   # Data collection
 │   ├── cloud_aws/
 │   │   ├── analyzer/
 │   │   └── extractor/
 │   ├── kubernetes/
 │   │   ├── analyzer/
 │   │   └── extractor/
-│   └── common/                       # Shared utilities
+│   └── common/                          # Shared utilities
 │
-├── tools/                            # Security tool integration
-│   └── comparison/                   # Tool comparison framework
+├── tools/                               # Security tool integration
+│   └── comparison/                      # Tool comparison framework
 │
-├── results/                          # Tool output and analysis
-│   └── tool_comparison/              # Comparative evaluation results
+├── results/                             # Analysis and comparison data
+│   ├── tool_comparison/                 # Comparative evaluation results
+│   ├── auspex_comparison/               # Auspex replication comparison
+│   └── repeatability/                   # n=5 repeatability validation
 │
-└── docs/                             # Documentation
+└── docs/                                # Documentation
 ```
+
+## Case Studies
+
+### Case Study 1: ML-Enhanced Supply Chain
+
+8-component software supply chain with ML components deployed across bare-metal, Kubernetes, and AWS.
+
+**Components:** Gitea, Jenkins, Docker Registry, Application, PostgreSQL, MLflow, ML Inference Service, Training Data Storage.
+
+| Platform | EC2/VMs | Traditional | ML | Total Instances |
+|----------|---------|------------|-----|-----------------|
+| Bare-metal | 3 VMs | 42 | 7 | 49 |
+| Kubernetes | 3 namespaces | 40 | 7 | 47 |
+| AWS | 3 EC2 | 63 | 8 | 71 |
+
+### Case Study 2: Quay Container Registry
+
+20-component enterprise container registry on AWS (2.5x component increase over CS1).
+
+**Components:** Quay Application (x2 HA), PostgreSQL, Redis, Minio, Clair, NGINX, Jenkins, LLM image analysis service, plus supporting infrastructure.
+
+| Platform | EC2 | Traditional | ML | Total Instances |
+|----------|-----|------------|-----|-----------------|
+| AWS | 7 | 36 | 11 | 47 |
 
 ## Quick Start
 
@@ -76,7 +113,7 @@ cd ../../../platforms/kubernetes/analyzer
 python main.py
 ```
 
-**Expected Output:** Detection of 17/17 threats with runtime flow confirmation
+**Expected Output:** Detection of 17/17 threat types with runtime flow confirmation
 
 ### Bare-Metal Deployment
 
@@ -149,33 +186,32 @@ The framework detects 17 architectural threat types:
 
 ## Key Results
 
-### Detection Accuracy by Platform
+### Detection Accuracy
 
-| Platform | Threats Detected | False Positives | Runtime Confirmation |
-|----------|------------------|-----------------|----------------------|
-| Bare-metal | 17/17 (100%) | 0 | ✓ |
-| Kubernetes | 17/17 (100%) | 0 | ✓ |
-| AWS Cloud | 17/17 (100%) | 0 | ✓ |
+| Platform | CS1 Threat Types | CS1 Instances | CS2 Threat Types | CS2 Instances |
+|----------|-------------|---------------|-------------|---------------|
+| Bare-metal | 17/17 (100%) | 49 | - | - |
+| Kubernetes | 17/17 (100%) | 47 | - | - |
+| AWS | 17/17 (100%) | 71 | 17/17 (100%) | 47 |
 
 ### Comparative Evaluation
 
-Comparison against six popular security scanning tools:
+Comparison against security scanning tools and Auspex architectural threat modeling:
 
-| Tool | Threat Detection | Platform Support | ML/AI Threats |
-|------|-----------------|------------------|---------------|
-| Trivy | 6-11% (1-2/17) | K8s, Containers | 0/7 |
-| Checkov | 12-18% (2-3/17) | IaC, K8s | 0/7 |
-| Kubelinter | 12% (2/17) | K8s only | 0/7 |
-| Kubescape | 41% (7/17) | K8s only | 0/7 |
-| Prowler | 47% (8/17) | AWS only | 0/7 |
-| Docker Bench | 18% (3/17) | Docker only | 0/7 |
-| **Our Framework** | **100% (17/17)** | **All platforms** | **7/7** |
+| Tool | CS1 Detection | CS2 Detection | ML/AI Threat Types | Approach |
+|------|--------------|---------------|---------------|----------|
+| **Our Framework** | **17/17 (100%)** | **17/17 (100%)** | **7/7** | Runtime-verified |
+| Auspex | 14/17 (82%) | - | 5/7 | Hypothetical (unverified) |
+| Prowler | 8/17 (47%) | 10/17 (59%) | 0/7 | AWS only |
+| Checkov | 3/17 (18%) | 7/17 (41%) | 0/7 | IaC scanning |
+| Kubescape | 7/17 (41%) | - | 0/7 | K8s only |
+| Docker Bench | 3/17 (18%) | - | 0/7 | Docker only |
+| Trivy | 1/17 (6%) | 5/17 (29%) | 0/7 | Container scanning |
+| Kubelinter | 2/17 (12%) | - | 0/7 | K8s YAML analysis |
 
-**Key Findings:**
-- Static IaC scanners (Trivy, Checkov, Kubelinter): 6-18% detection
-- CSPM tools (Kubescape, Prowler, Docker Bench): 18-47% detection
-- **No existing tool detects ML/AI-specific architectural threats**
-- Our methodology: 100% detection including all 7 ML-specific threats
+### Repeatability
+
+n=5 independent runs on AWS demonstrate 100% detection reproducibility (mean=17.0, std=0.0 threat types) for both case studies. See `results/repeatability/` for data.
 
 ## Architecture
 
@@ -257,28 +293,10 @@ python parse_tool_results.py
 cat ../../results/tool_comparison/comparison_table.md
 ```
 
-## Use Cases
-
-### 1. Security Assessment
-Identify architectural threats in existing deployments without requiring source code or design documents.
-
-### 2. Continuous Monitoring
-Integrate into CI/CD pipelines to detect configuration drift and new threats.
-
-### 3. Multi-Platform Comparison
-Compare security posture across different deployment platforms (bare-metal vs K8s vs cloud).
-
-### 4. ML/AI Security
-Detect threats specific to machine learning infrastructure (model theft, training data poisoning, etc.).
-
-### 5. Tool Gap Analysis
-Understand limitations of existing security scanning tools and their coverage gaps.
-
 ## Documentation
 
 - **[Architecture Overview](docs/ARCHITECTURE.md)** - System design and components
 - **[Implementation Guide](docs/IMPLEMENTATION.md)** - Detailed setup instructions
-- **[Quick Start](docs/QUICK_START.md)** - Getting started guide
 - **[Hubble Setup](docs/HUBBLE_SETUP.md)** - Network flow monitoring configuration
 - **[Tool Comparison](tools/comparison/README.md)** - Security tool integration guide
 - **[Threat Taxonomy](dynamic_threat_modeling/README.md)** - Complete threat descriptions
@@ -287,27 +305,28 @@ Understand limitations of existing security scanning tools and their coverage ga
 
 This work is described in the paper:
 
-**Title:** Semi-Automated Threat Modeling: Extracting Software Architecture from Configuration Settings to Identify Threats
+**Title:** Semi-Automated Threat Modeling of Cloud-Based Systems Through Extracting Software Architecture from Configuration and Network Flow
 
-**Authors:** Nicholas Pecka, Lotfi Ben Othmane, Renee Bryce
+**Authors:** Nicholas Pecka, Lotfi Ben Othmane, Sai Deepak Bhargava, Renee Bryce
 
-**Abstract:** Traditional threat modeling requires manual architecture documentation and expert security knowledge. This framework automates threat detection by extracting runtime architecture from deployed systems and applying platform-agnostic threat patterns. We validate the approach across three platforms (bare-metal, Kubernetes, AWS) with a vulnerable ML supply chain, achieving 100% detection of 17 threat types including 7 ML-specific threats missed by all existing tools.
+**Venue:** IEEE Transactions on Services Computing (TSC), 2026
 
 ## Citation
 
 If you use this framework in your research, please cite:
 
 ```bibtex
-@article{pecka2025dynamic,
-  title={Semi-Automated Threat Modeling: Extracting Software Architecture from Configuration Settings to Identify Threats},
-  author={Pecka, Nicholas and Ben Othmane, Lotfi and Bryce, Renee},
-  year={2025}
+@article{pecka2026dynamic,
+  title={Semi-Automated Threat Modeling of Cloud-Based Systems Through Extracting Software Architecture from Configuration and Network Flow},
+  author={Pecka, Nicholas and Ben Othmane, Lotfi and Bhargava, Sai Deepak and Bryce, Renee},
+  journal={IEEE Transactions on Services Computing},
+  year={2026}
 }
 ```
 
 ## License
 
-[Specify your license here]
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contact
 

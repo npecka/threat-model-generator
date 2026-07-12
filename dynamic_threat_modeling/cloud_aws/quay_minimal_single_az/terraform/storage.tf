@@ -41,7 +41,8 @@ resource "aws_s3_bucket_public_access_block" "quay_storage" {
 
 # T05: Bucket policy allows anonymous read access
 resource "aws_s3_bucket_policy" "quay_storage" {
-  bucket = aws_s3_bucket.quay_storage.id
+  depends_on = [aws_s3_bucket_public_access_block.quay_storage]
+  bucket     = aws_s3_bucket.quay_storage.id
 
   policy = jsonencode({
     Version = "2012-10-17"

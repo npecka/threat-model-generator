@@ -1,0 +1,8 @@
+{
+  "check_type": "kubernetes",
+  "results": {
+    "passed_checks": [],
+    "failed_checks": [],
+    "skipped_checks": []
+  }
+}

@@ -12,29 +12,30 @@ INSTANCE_TAG_FILTER = {
 }
 
 # Alternative: Filter by name pattern
-INSTANCE_NAME_PATTERN = 'quay-minimal-*'
+INSTANCE_NAME_PATTERN = 'quay-*'
 
 # SSH Configuration (for accessing instances to collect app configs)
 SSH_USER = 'ec2-user'
-SSH_KEY_PATH = os.path.expanduser('~/.ssh/quay-minimal-key')
+SSH_KEY_PATH = os.path.expanduser('~/.ssh/id_ed25519')
 
 # Application service ports
 SERVICE_PORTS = {
-    'gitea': 3000,
+    'quay': 8080,
     'jenkins': 8080,
-    'registry': 5000,
-    'application': 80,
-    'postgres': 5432
+    'nginx': 80,
+    'postgres': 5432,
+    'redis': 6379,
+    'minio': 9000,
+    'llm': 8000,
 }
 
 # Config files to collect from instances (T8 detection)
 CONFIG_FILE_PATHS = [
-    '~/gitea/docker-compose.yml',
-    '~/gitea/data/gitea/conf/app.ini',
-    '~/jenkins/docker-compose.yml',
-    '~/registry/docker-compose.yml',
-    '~/app/docker-compose.yml',
-    '~/app/.env',
+    '/opt/quay/config/config.yaml',
+    '/opt/clair/config/config.yaml',
+    '/opt/nginx/conf/nginx.conf',
+    '/opt/llm/model-info.json',
+    '/var/jenkins_home/credentials.env',
     '/etc/docker/daemon.json',  # T7: Logging config
 ]
 

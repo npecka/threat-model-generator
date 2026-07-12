@@ -277,28 +277,45 @@ class AWSToolIntegrator:
         # T11: Unauthorized Model Access - ML services without authentication
         for instance in instances:
             instance_name = instance.get("name", "").lower()
-            if any(keyword in instance_name for keyword in ["llm", "ml", "model", "inference"]):
-                # Check if ML service port is exposed publicly
+            user_data = instance.get("user_data", "")
+            # Check both instance name AND user_data for ML services
+            has_ml_service = (any(keyword in instance_name for keyword in ["llm", "ml", "model", "inference"]) or
+                            any(keyword in user_data.lower() for keyword in ["mlflow", "ml-inference", "ml_inference", "model-server"]))
+            if has_ml_service:
+                # Check if ML service port is exposed publicly or auth is disabled
                 for sg_id in instance.get("security_groups", []):
                     sg = next((s for s in security_groups if s.get("id") == sg_id), None)
                     if sg:
                         for rule in sg.get("ingress_rules", []):
-                            if "0.0.0.0/0" in rule.get("cidr_blocks", []) and rule.get("from_port") in [8000, 8080, 5000]:
+                            if "0.0.0.0/0" in rule.get("cidr_blocks", []) and rule.get("from_port") in [8000, 8080, 5000, 5001]:
                                 detected_threats.add("T11")
                                 findings.append({
-                                    "issue": f"ML service {instance_name} exposed without authentication",
+                                    "issue": f"ML service on {instance_name} exposed without authentication",
                                     "severity": "CRITICAL",
                                     "resource": instance_name
                                 })
+                                break
+                # Also check for MLFLOW_AUTH=none in user_data
+                if "mlflow_auth=none" in user_data.lower() or "no-auth" in user_data.lower():
+                    detected_threats.add("T11")
+                    findings.append({
+                        "issue": f"MLflow on {instance_name} configured without authentication",
+                        "severity": "CRITICAL",
+                        "resource": instance_name
+                    })
 
         # T12: Training Data Poisoning - Check for training data services
         for instance in instances:
             instance_name = instance.get("name", "").lower()
-            if any(keyword in instance_name for keyword in ["training", "data", "mlflow"]):
+            user_data = instance.get("user_data", "")
+            # Check both instance name AND user_data for training/MLflow services
+            has_training_service = (any(keyword in instance_name for keyword in ["training", "data", "mlflow"]) or
+                                   "mlflow" in user_data.lower() or "training" in user_data.lower())
+            if has_training_service:
                 # No validation or access control on training data sources
                 detected_threats.add("T12")
                 findings.append({
-                    "issue": f"Training data service {instance_name} may lack validation",
+                    "issue": f"Training data service on {instance_name} may lack validation",
                     "severity": "HIGH",
                     "resource": instance_name
                 })
@@ -306,30 +323,42 @@ class AWSToolIntegrator:
         # T13: Model Theft via API - Unrestricted inference APIs
         for instance in instances:
             instance_name = instance.get("name", "").lower()
-            if any(keyword in instance_name for keyword in ["llm", "inference", "model"]):
-                # Check for public access without rate limiting
+            user_data = instance.get("user_data", "")
+            # Check both instance name AND user_data for inference services
+            has_inference_service = (any(keyword in instance_name for keyword in ["llm", "inference", "model"]) or
+                                    any(keyword in user_data.lower() for keyword in ["ml-inference", "ml_inference", "/predict", "inference"]))
+            if has_inference_service:
+                # Check for public access without rate limiting or auth comments in user_data
+                has_no_auth = "# T13: No authentication" in user_data or "no authentication" in user_data.lower()
                 for sg_id in instance.get("security_groups", []):
                     sg = next((s for s in security_groups if s.get("id") == sg_id), None)
                     if sg:
                         for rule in sg.get("ingress_rules", []):
-                            if "0.0.0.0/0" in rule.get("cidr_blocks", []):
+                            if "0.0.0.0/0" in rule.get("cidr_blocks", []) or has_no_auth:
                                 detected_threats.add("T13")
                                 findings.append({
-                                    "issue": f"ML inference API {instance_name} allows unrestricted access",
+                                    "issue": f"ML inference API on {instance_name} allows unrestricted access",
                                     "severity": "HIGH",
                                     "resource": instance_name
                                 })
+                                break
 
         # T14: Unencrypted Model Transfer - HTTP model downloads
         for instance in instances:
             instance_name = instance.get("name", "").lower()
             user_data = instance.get("user_data", "")
-            if any(keyword in instance_name for keyword in ["llm", "ml", "model"]):
-                # Check for HTTP downloads in user-data or config
-                if "http://" in user_data.lower() and any(ext in user_data for ext in [".bin", ".model", ".gguf", ".safetensors"]):
+            # Check for ML services in user_data OR instance name
+            has_ml = (any(keyword in instance_name for keyword in ["llm", "ml", "model"]) or
+                     any(keyword in user_data.lower() for keyword in ["mlflow", "ml-inference", "inference"]))
+            if has_ml:
+                # Check for HTTP downloads/transfers in user-data (T14 marker or MLFLOW_TRACKING_URI=http)
+                if ("http://" in user_data.lower() and
+                    (any(ext in user_data for ext in [".bin", ".model", ".gguf", ".safetensors"]) or
+                     "mlflow_tracking_uri" in user_data.lower() or
+                     "# T14:" in user_data)):
                     detected_threats.add("T14")
                     findings.append({
-                        "issue": f"Instance {instance_name} downloads models over HTTP",
+                        "issue": f"Instance {instance_name} transfers models over unencrypted HTTP",
                         "severity": "MEDIUM",
                         "resource": instance_name
                     })
@@ -339,7 +368,11 @@ class AWSToolIntegrator:
         ml_instance_profiles = set()
         for instance in instances:
             instance_name = instance.get("name", "").lower()
-            if any(keyword in instance_name for keyword in ["llm", "ml", "training", "inference"]):
+            user_data = instance.get("user_data", "")
+            # Check for ML services in instance name OR user_data
+            has_ml = (any(keyword in instance_name for keyword in ["llm", "ml", "training", "inference"]) or
+                     any(keyword in user_data.lower() for keyword in ["mlflow", "ml-inference", "training"]))
+            if has_ml:
                 profile_arn = instance.get("iam_instance_profile", "")
                 if profile_arn:
                     ml_instance_profiles.add(profile_arn)
@@ -379,13 +412,19 @@ class AWSToolIntegrator:
         # T16: Missing Model Provenance - No model lineage tracking
         for instance in instances:
             instance_name = instance.get("name", "").lower()
+            user_data = instance.get("user_data", "")
             tags = instance.get("tags", {})
-            if any(keyword in instance_name for keyword in ["llm", "ml", "model", "inference"]):
-                # Check for model provenance tags
-                if not any(tag_key in tags for tag_key in ["ModelSource", "ModelVersion", "ModelChecksum"]):
+            # Check for ML services in instance name OR user_data
+            has_ml = (any(keyword in instance_name for keyword in ["llm", "ml", "model", "inference"]) or
+                     any(keyword in user_data.lower() for keyword in ["mlflow", "ml-inference", "model"]))
+            if has_ml:
+                # Check for model provenance tags or T16 marker in user_data
+                has_no_provenance = ("# T16:" in user_data or "no provenance" in user_data.lower() or
+                                    "filesystem backend" in user_data.lower())
+                if not any(tag_key in tags for tag_key in ["ModelSource", "ModelVersion", "ModelChecksum"]) or has_no_provenance:
                     detected_threats.add("T16")
                     findings.append({
-                        "issue": f"ML service {instance_name} lacks model provenance tracking",
+                        "issue": f"ML service on {instance_name} lacks model provenance tracking",
                         "severity": "MEDIUM",
                         "resource": instance_name
                     })
@@ -394,12 +433,16 @@ class AWSToolIntegrator:
         for instance in instances:
             instance_name = instance.get("name", "").lower()
             user_data = instance.get("user_data", "")
-            if any(keyword in instance_name for keyword in ["llm", "ml", "model"]):
+            # Check for ML services in instance name OR user_data
+            has_ml = (any(keyword in instance_name for keyword in ["llm", "ml", "model"]) or
+                     any(keyword in user_data.lower() for keyword in ["mlflow", "ml-inference", "inference", "/predict"]))
+            if has_ml:
                 # Check for model metadata exposure in user-data (various formats)
                 metadata_patterns = [
                     "model_name", "model_path", "model_config",
                     "model-info", "quantization", "download_url",
-                    "context_length", "parameters"
+                    "context_length", "parameters", "# T17:", "debug_mode=true",
+                    "model_type", "hyperparameters", "model_version"
                 ]
                 if any(pattern in user_data.lower() for pattern in metadata_patterns):
                     detected_threats.add("T17")
@@ -486,9 +529,9 @@ class AWSToolIntegrator:
 
             # Auto-discover: look for terraform directories in common case study locations
             terraform_dirs_to_try.extend([
+                Path("dynamic_threat_modeling/cloud_aws/supply_chain/terraform"),
                 Path("dynamic_threat_modeling/cloud_aws/quay_minimal_single_az/terraform"),
                 Path("dynamic_threat_modeling/cloud_aws/quay_ha/terraform"),
-                Path("case_studies/cloud_aws/supply_chain/terraform"),
             ])
 
             terraform_dir = None

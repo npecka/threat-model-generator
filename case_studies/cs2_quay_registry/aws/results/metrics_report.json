@@ -1,0 +1,75 @@
+{
+  "end_to_end_overhead": {
+    "total_time_seconds": 167.96766257286072,
+    "extraction_time_seconds": 164.77681350708008,
+    "analysis_time_seconds": 3.1908490657806396,
+    "extraction_percentage": 98.10031942047385,
+    "analysis_percentage": 1.8996805795261444,
+    "peak_memory_mb": 75.7265625,
+    "weighted_avg_cpu_percent": 7.839722846513716
+  },
+  "extractor_performance": {
+    "total_time_seconds": 164.77681350708008,
+    "phase_breakdown": {
+      "ec2_instances_collection": 1.4416134357452393,
+      "security_groups_collection": 0.39028263092041016,
+      "iam_roles_collection": 0.72043776512146,
+      "iam_users_collection": 0.737668514251709,
+      "vpc_collection": 0.7392635345458984,
+      "config_files_collection": 138.4187753200531,
+      "s3_buckets_collection": 0.5373823642730713,
+      "docker_info_collection": 21.775059938430786,
+      "output_serialization": 0.01633000373840332
+    },
+    "max_memory_mb": 75.7265625,
+    "memory_by_phase": {
+      "ec2_instances_collection": 63.72265625,
+      "security_groups_collection": 64.890625,
+      "iam_roles_collection": 69.328125,
+      "iam_users_collection": 69.46484375,
+      "vpc_collection": 69.49609375,
+      "config_files_collection": 69.49609375,
+      "s3_buckets_collection": 75.7265625,
+      "docker_info_collection": 75.7265625,
+      "output_serialization": 75.7265625
+    },
+    "avg_cpu_percent": 7.870471458063368,
+    "cpu_by_phase": {
+      "ec2_instances_collection": 15.260679079775045,
+      "security_groups_collection": 12.811228591465662,
+      "iam_roles_collection": 8.328269686124038,
+      "iam_users_collection": 12.200602067352161,
+      "vpc_collection": 5.410790351585584,
+      "config_files_collection": 0.028897813831621967,
+      "s3_buckets_collection": 16.747851433819363,
+      "docker_info_collection": 0.04592409861683557,
+      "output_serialization": 0.0
+    }
+  },
+  "analyzer_performance": {
+    "total_time_seconds": 3.1908490657806396,
+    "phase_breakdown": {
+      "data_collection": 0.022981882095336914,
+      "threat_detection": 3.10675311088562,
+      "threat_correlation": 0.00012493133544921875,
+      "model_building": 0.028665781021118164,
+      "report_generation": 0.032323360443115234
+    },
+    "max_memory_mb": 15.6171875,
+    "memory_by_phase": {
+      "data_collection": 15.37890625,
+      "threat_detection": 15.53515625,
+      "threat_correlation": 15.5390625,
+      "model_building": 15.54296875,
+      "report_generation": 15.6171875
+    },
+    "avg_cpu_percent": 6.251851365767537,
+    "cpu_by_phase": {
+      "data_collection": 0.0,
+      "threat_detection": 0.32187945559502046,
+      "threat_correlation": 0.0,
+      "model_building": 0.0,
+      "report_generation": 30.937377373242665
+    }
+  }
+}

@@ -6,7 +6,7 @@ Collects application config files from EC2 instances via SSH
 
 import subprocess
 import re
-from config import SSH_USER, CONFIG_FILE_PATHS, SECRET_PATTERNS
+from config import SSH_USER, SSH_KEY_PATH, CONFIG_FILE_PATHS, SECRET_PATTERNS
 
 
 def run_ssh_command(instance_ip, command, use_sudo=False):
@@ -16,6 +16,7 @@ def run_ssh_command(instance_ip, command, use_sudo=False):
 
     ssh_command = [
         'ssh',
+        '-i', SSH_KEY_PATH,
         '-o', 'StrictHostKeyChecking=no',
         '-o', 'UserKnownHostsFile=/dev/null',
         '-o', 'LogLevel=ERROR',

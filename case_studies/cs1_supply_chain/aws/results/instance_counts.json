@@ -1,0 +1,29 @@
+{
+  "platform": "aws",
+  "case_study": "cs1_supply_chain",
+  "components": 8,
+  "ec2_instances": 3,
+  "threat_types_detected": 17,
+  "traditional_instances": 63,
+  "ml_instances": 8,
+  "total_instances": 71,
+  "by_type": {
+    "T01": 5,
+    "T02": 2,
+    "T03": 11,
+    "T04": 2,
+    "T05": 2,
+    "T06": 2,
+    "T07": 5,
+    "T08": 15,
+    "T09": 6,
+    "T10": 13,
+    "T11": 1,
+    "T12": 2,
+    "T13": 1,
+    "T14": 1,
+    "T15": 1,
+    "T16": 1,
+    "T17": 1
+  }
+}

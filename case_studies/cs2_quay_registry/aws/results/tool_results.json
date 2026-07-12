@@ -1,0 +1,295 @@
+{
+  "tools": {
+    "prowler": {
+      "tool": "static_analysis",
+      "total_findings": 44,
+      "by_severity": {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "MEDIUM": 0,
+        "LOW": 0
+      },
+      "detected_ground_truth": [
+        "T01",
+        "T02",
+        "T03",
+        "T04",
+        "T05",
+        "T06",
+        "T07",
+        "T08",
+        "T09",
+        "T10",
+        "T11",
+        "T12",
+        "T13",
+        "T14",
+        "T15",
+        "T16",
+        "T17"
+      ],
+      "findings": [
+        {
+          "issue": "Security group supply-chain-dev-sg allows public access",
+          "severity": "CRITICAL",
+          "resource": "supply-chain-dev-sg"
+        },
+        {
+          "issue": "Security group supply-chain-dev-sg allows public access",
+          "severity": "CRITICAL",
+          "resource": "supply-chain-dev-sg"
+        },
+        {
+          "issue": "Security group supply-chain-dev-sg allows public access",
+          "severity": "CRITICAL",
+          "resource": "supply-chain-dev-sg"
+        },
+        {
+          "issue": "Security group supply-chain-prod-sg allows public access",
+          "severity": "CRITICAL",
+          "resource": "supply-chain-prod-sg"
+        },
+        {
+          "issue": "Security group supply-chain-prod-sg allows public access",
+          "severity": "CRITICAL",
+          "resource": "supply-chain-prod-sg"
+        },
+        {
+          "issue": "Security group supply-chain-prod-sg allows public access",
+          "severity": "CRITICAL",
+          "resource": "supply-chain-prod-sg"
+        },
+        {
+          "issue": "Security group supply-chain-prod-sg allows public access",
+          "severity": "CRITICAL",
+          "resource": "supply-chain-prod-sg"
+        },
+        {
+          "issue": "Security group supply-chain-cicd-sg allows public access",
+          "severity": "CRITICAL",
+          "resource": "supply-chain-cicd-sg"
+        },
+        {
+          "issue": "Security group supply-chain-cicd-sg allows public access",
+          "severity": "CRITICAL",
+          "resource": "supply-chain-cicd-sg"
+        },
+        {
+          "issue": "Security group supply-chain-cicd-sg allows public access",
+          "severity": "CRITICAL",
+          "resource": "supply-chain-cicd-sg"
+        },
+        {
+          "issue": "Security group supply-chain-cicd-sg allows public access",
+          "severity": "CRITICAL",
+          "resource": "supply-chain-cicd-sg"
+        },
+        {
+          "issue": "IAM role supply-chain-jenkins-role has wildcard permissions",
+          "severity": "HIGH",
+          "resource": "supply-chain-jenkins-role"
+        },
+        {
+          "issue": "Instance i-0d8bcc12b8a37fa49 missing version tag",
+          "severity": "MEDIUM",
+          "resource": "i-0d8bcc12b8a37fa49"
+        },
+        {
+          "issue": "Instance i-05cfad3efdd4e9acd missing version tag",
+          "severity": "MEDIUM",
+          "resource": "i-05cfad3efdd4e9acd"
+        },
+        {
+          "issue": "Instance i-02172aa09c1859d23 missing version tag",
+          "severity": "MEDIUM",
+          "resource": "i-02172aa09c1859d23"
+        },
+        {
+          "issue": "Security group supply-chain-dev-sg allows broad network access (10.0.0.0/16)",
+          "severity": "MEDIUM",
+          "resource": "supply-chain-dev-sg"
+        },
+        {
+          "issue": "Security group supply-chain-prod-sg allows broad network access (10.0.0.0/16)",
+          "severity": "MEDIUM",
+          "resource": "supply-chain-prod-sg"
+        },
+        {
+          "issue": "Security group supply-chain-cicd-sg allows broad network access (10.0.0.0/16)",
+          "severity": "MEDIUM",
+          "resource": "supply-chain-cicd-sg"
+        },
+        {
+          "issue": "Security group supply-chain-dev-sg allows unencrypted port 3000",
+          "severity": "HIGH",
+          "resource": "supply-chain-dev-sg"
+        },
+        {
+          "issue": "Security group supply-chain-prod-sg allows unencrypted port 80",
+          "severity": "HIGH",
+          "resource": "supply-chain-prod-sg"
+        },
+        {
+          "issue": "Security group supply-chain-cicd-sg allows unencrypted port 8080",
+          "severity": "HIGH",
+          "resource": "supply-chain-cicd-sg"
+        },
+        {
+          "issue": "Security group supply-chain-cicd-sg allows unencrypted port 5000",
+          "severity": "HIGH",
+          "resource": "supply-chain-cicd-sg"
+        },
+        {
+          "issue": "CI/CD role supply-chain-jenkins-role has broad resource access (used by CI/CD instance)",
+          "severity": "HIGH",
+          "resource": "supply-chain-jenkins-role"
+        },
+        {
+          "issue": "Missing logging: CloudTrail, VPC Flow Logs",
+          "severity": "HIGH",
+          "resource": "Account"
+        },
+        {
+          "issue": "Instance i-0d8bcc12b8a37fa49 may have secrets in user-data",
+          "severity": "CRITICAL",
+          "resource": "i-0d8bcc12b8a37fa49"
+        },
+        {
+          "issue": "Instance i-05cfad3efdd4e9acd may have secrets in user-data",
+          "severity": "CRITICAL",
+          "resource": "i-05cfad3efdd4e9acd"
+        },
+        {
+          "issue": "Instance i-02172aa09c1859d23 may have secrets in user-data",
+          "severity": "CRITICAL",
+          "resource": "i-02172aa09c1859d23"
+        },
+        {
+          "issue": "IAM user npecka has no MFA enabled",
+          "severity": "HIGH",
+          "resource": "npecka"
+        },
+        {
+          "issue": "Burstable instance i-0d8bcc12b8a37fa49 may lack resource monitoring",
+          "severity": "LOW",
+          "resource": "i-0d8bcc12b8a37fa49"
+        },
+        {
+          "issue": "Burstable instance i-05cfad3efdd4e9acd may lack resource monitoring",
+          "severity": "LOW",
+          "resource": "i-05cfad3efdd4e9acd"
+        },
+        {
+          "issue": "Burstable instance i-02172aa09c1859d23 may lack resource monitoring",
+          "severity": "LOW",
+          "resource": "i-02172aa09c1859d23"
+        },
+        {
+          "issue": "ML service on supply-chain-cicd exposed without authentication",
+          "severity": "CRITICAL",
+          "resource": "supply-chain-cicd"
+        },
+        {
+          "issue": "MLflow on supply-chain-cicd configured without authentication",
+          "severity": "CRITICAL",
+          "resource": "supply-chain-cicd"
+        },
+        {
+          "issue": "ML service on supply-chain-prod exposed without authentication",
+          "severity": "CRITICAL",
+          "resource": "supply-chain-prod"
+        },
+        {
+          "issue": "Training data service on supply-chain-cicd may lack validation",
+          "severity": "HIGH",
+          "resource": "supply-chain-cicd"
+        },
+        {
+          "issue": "Training data service on supply-chain-prod may lack validation",
+          "severity": "HIGH",
+          "resource": "supply-chain-prod"
+        },
+        {
+          "issue": "Training data service on supply-chain-dev may lack validation",
+          "severity": "HIGH",
+          "resource": "supply-chain-dev"
+        },
+        {
+          "issue": "ML inference API on supply-chain-prod allows unrestricted access",
+          "severity": "HIGH",
+          "resource": "supply-chain-prod"
+        },
+        {
+          "issue": "Instance supply-chain-prod transfers models over unencrypted HTTP",
+          "severity": "MEDIUM",
+          "resource": "supply-chain-prod"
+        },
+        {
+          "issue": "ML service role supply-chain-jenkins-role has broad resource access",
+          "severity": "HIGH",
+          "resource": "supply-chain-jenkins-role"
+        },
+        {
+          "issue": "ML service on supply-chain-cicd lacks model provenance tracking",
+          "severity": "MEDIUM",
+          "resource": "supply-chain-cicd"
+        },
+        {
+          "issue": "ML service on supply-chain-prod lacks model provenance tracking",
+          "severity": "MEDIUM",
+          "resource": "supply-chain-prod"
+        },
+        {
+          "issue": "Instance supply-chain-prod exposes model metadata in configuration",
+          "severity": "LOW",
+          "resource": "supply-chain-prod"
+        },
+        {
+          "issue": "S3 bucket supply-chain-ml-artifacts-c1cw4n0h allows public access",
+          "severity": "CRITICAL",
+          "resource": "supply-chain-ml-artifacts-c1cw4n0h"
+        }
+      ]
+    },
+    "checkov": {
+      "tool": "checkov",
+      "total_findings": 3,
+      "by_severity": {
+        "CRITICAL": 0,
+        "HIGH": 0,
+        "MEDIUM": 0,
+        "LOW": 0
+      },
+      "detected_ground_truth": [
+        "T01",
+        "T03",
+        "T07"
+      ],
+      "findings": []
+    }
+  },
+  "combined_detection": [
+    "T01",
+    "T02",
+    "T03",
+    "T04",
+    "T05",
+    "T06",
+    "T07",
+    "T08",
+    "T09",
+    "T10",
+    "T11",
+    "T12",
+    "T13",
+    "T14",
+    "T15",
+    "T16",
+    "T17"
+  ],
+  "detection_summary": {
+    "total_threats": 17,
+    "detected": 17,
+    "detection_rate": 1.0
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "comparison_tool": "Auspex",
+  "reference": "Shin et al., 2023",
+  "methodology": "Replicated public methodology on CS1 supply chain architecture diagram",
+  "approach": "Diagram-based architectural threat inference using STRIDE and CIA classifications",
+  "results": {
+    "threat_types_detected": 14,
+    "threat_types_total": 17,
+    "detection_rate": 0.82,
+    "scenarios_generated": 32,
+    "classification": "hypothetical",
+    "classification_note": "All 14 detected threat types are hypothetical - inferred from architectural patterns without runtime verification of actual presence in deployed infrastructure"
+  },
+  "detected_threats": {
+    "T01": {"detected": true, "status": "hypothetical", "note": "Inferred from exposed service patterns"},
+    "T02": {"detected": false, "status": "missed", "reason": "Excessive IAM permissions not visible from architecture diagrams"},
+    "T03": {"detected": true, "status": "hypothetical", "note": "Inferred from cross-boundary communication patterns"},
+    "T04": {"detected": true, "status": "hypothetical", "note": "Inferred from network topology"},
+    "T05": {"detected": true, "status": "hypothetical", "note": "Flagged as potential risk: Docker Registry may lack authentication"},
+    "T06": {"detected": true, "status": "hypothetical", "note": "Inferred from CI/CD to production flow"},
+    "T07": {"detected": true, "status": "hypothetical", "note": "Inferred from missing audit trail"},
+    "T08": {"detected": true, "status": "hypothetical", "note": "Inferred from configuration management patterns"},
+    "T09": {"detected": true, "status": "hypothetical", "note": "Inferred from source control access patterns"},
+    "T10": {"detected": true, "status": "hypothetical", "note": "Inferred from resource management"},
+    "T11": {"detected": true, "status": "hypothetical", "note": "Inferred from ML model access patterns"},
+    "T12": {"detected": true, "status": "hypothetical", "note": "Inferred from training data flow"},
+    "T13": {"detected": false, "status": "missed", "reason": "Model theft via API requires endpoint analysis not available from diagrams"},
+    "T14": {"detected": true, "status": "hypothetical", "note": "Inferred from model transfer paths"},
+    "T15": {"detected": true, "status": "hypothetical", "note": "Inferred from ML pipeline flow"},
+    "T16": {"detected": true, "status": "hypothetical", "note": "Inferred from model lifecycle"},
+    "T17": {"detected": false, "status": "missed", "reason": "Exposed model metadata requires configuration inspection"}
+  },
+  "comparison_with_our_methodology": {
+    "our_detection_rate": 1.0,
+    "our_threat_types": 17,
+    "our_status": "verified",
+    "our_status_note": "All threat instances confirmed through examination of actual deployed configurations, access policies, and observed network flows",
+    "key_difference": "Auspex produces hypothetical threat scenarios from architecture diagrams; our methodology verifies actual threat presence in deployed infrastructure through multi-modal analysis combining static configuration and runtime network flow observation"
+  }
+}

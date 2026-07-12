@@ -1,0 +1,126 @@
+{
+  "tool": "Kubescape",
+  "platform": "Kubernetes",
+  "scan_date": "0001-01-01T00:00:00Z",
+  "total_controls": 47,
+  "detected_threats": {
+    "T06": [
+      {
+        "control": "C-0007",
+        "name": "Roles with delete capabilities",
+        "failures": 47,
+        "severity": "Medium"
+      },
+      {
+        "control": "C-0035",
+        "name": "Administrative Roles",
+        "failures": 17,
+        "severity": "Medium"
+      },
+      {
+        "control": "C-0187",
+        "name": "Minimize wildcard use in Roles and ClusterRoles",
+        "failures": 17,
+        "severity": "High"
+      },
+      {
+        "control": "C-0188",
+        "name": "Minimize access to create pods",
+        "failures": 23,
+        "severity": "Medium"
+      }
+    ],
+    "T08": [
+      {
+        "control": "C-0012",
+        "name": "Applications credentials in configuration files",
+        "failures": 19,
+        "severity": "High"
+      },
+      {
+        "control": "C-0015",
+        "name": "List Kubernetes secrets",
+        "failures": 51,
+        "severity": "High"
+      },
+      {
+        "control": "C-0066",
+        "name": "Secret/etcd encryption enabled",
+        "failures": 1,
+        "severity": "Medium"
+      }
+    ],
+    "T02": [
+      {
+        "control": "C-0035",
+        "name": "Administrative Roles",
+        "failures": 17,
+        "severity": "Medium"
+      },
+      {
+        "control": "C-0057",
+        "name": "Privileged container",
+        "failures": 10,
+        "severity": "High"
+      },
+      {
+        "control": "C-0187",
+        "name": "Minimize wildcard use in Roles and ClusterRoles",
+        "failures": 17,
+        "severity": "High"
+      }
+    ],
+    "T03": [
+      {
+        "control": "C-0066",
+        "name": "Secret/etcd encryption enabled",
+        "failures": 1,
+        "severity": "Medium"
+      }
+    ],
+    "T07": [
+      {
+        "control": "C-0067",
+        "name": "Audit logs enabled",
+        "failures": 1,
+        "severity": "Medium"
+      }
+    ],
+    "T04": [
+      {
+        "control": "C-0260",
+        "name": "Missing network policy",
+        "failures": 75,
+        "severity": "Medium"
+      }
+    ],
+    "T01": [
+      {
+        "control": "C-0262",
+        "name": "Anonymous access enabled",
+        "failures": 1,
+        "severity": "High"
+      }
+    ],
+    "T10": [
+      {
+        "control": "C-0270",
+        "name": "Ensure CPU limits are set",
+        "failures": 56,
+        "severity": "High"
+      },
+      {
+        "control": "C-0271",
+        "name": "Ensure memory limits are set",
+        "failures": 56,
+        "severity": "High"
+      }
+    ]
+  },
+  "summary": {
+    "total_threats": 17,
+    "detected": 8,
+    "missed": 9,
+    "detection_rate": "47.1%"
+  }
+}

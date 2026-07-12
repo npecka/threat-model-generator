@@ -1,0 +1,29 @@
+{
+  "platform": "bare_metal",
+  "case_study": "cs1_supply_chain",
+  "components": 8,
+  "vms": 3,
+  "threat_types_detected": 17,
+  "traditional_instances": 42,
+  "ml_instances": 7,
+  "total_instances": 49,
+  "by_type": {
+    "T01": 3,
+    "T02": 1,
+    "T03": 5,
+    "T04": 1,
+    "T05": 2,
+    "T06": 1,
+    "T07": 3,
+    "T08": 13,
+    "T09": 4,
+    "T10": 8,
+    "T11": 1,
+    "T12": 1,
+    "T13": 1,
+    "T14": 1,
+    "T15": 1,
+    "T16": 1,
+    "T17": 1
+  }
+}
