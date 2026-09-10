@@ -93,7 +93,7 @@ def _analyze_pod_security(pod):
         threats.append({
             "pod": pod_name,
             "namespace": namespace,
-            "threat_id": "FORMAL-K8S001",
+            "threat_id": "T10",
             "category": "Formal (K8s Config)",
             "description": f"Pod {pod_name} has hostPID=true (host process namespace access)",
             "severity": "Critical",
@@ -110,7 +110,7 @@ def _analyze_pod_security(pod):
         threats.append({
             "pod": pod_name,
             "namespace": namespace,
-            "threat_id": "FORMAL-K8S002",
+            "threat_id": "T10",
             "category": "Formal (K8s Config)",
             "description": f"Pod {pod_name} has hostNetwork=true (host network namespace access)",
             "severity": "High",
@@ -127,7 +127,7 @@ def _analyze_pod_security(pod):
         threats.append({
             "pod": pod_name,
             "namespace": namespace,
-            "threat_id": "FORMAL-K8S003",
+            "threat_id": "T10",
             "category": "Formal (K8s Config)",
             "description": f"Pod {pod_name} has hostIPC=true (host IPC namespace access)",
             "severity": "High",
@@ -144,7 +144,7 @@ def _analyze_pod_security(pod):
         threats.append({
             "pod": pod_name,
             "namespace": namespace,
-            "threat_id": "FORMAL-K8S004",
+            "threat_id": "T10",
             "category": "Formal (K8s Config)",
             "description": f"Pod {pod_name} runs with privileged=true",
             "severity": "Critical",
@@ -165,7 +165,7 @@ def _analyze_pod_security(pod):
             threats.append({
                 "pod": pod_name,
                 "namespace": namespace,
-                "threat_id": "FORMAL-K8S005",
+                "threat_id": "T10",
                 "category": "Formal (K8s Config)",
                 "description": f"Container {container_name} in {pod_name} runs privileged",
                 "severity": "Critical",
@@ -186,7 +186,7 @@ def _analyze_pod_security(pod):
                 threats.append({
                     "pod": pod_name,
                     "namespace": namespace,
-                    "threat_id": "FORMAL-K8S006",
+                    "threat_id": "T10",
                     "category": "Formal (K8s Config)",
                     "description": f"Container {container_name} has dangerous capability {cap}",
                     "severity": "High",
@@ -203,7 +203,7 @@ def _analyze_pod_security(pod):
             threats.append({
                 "pod": pod_name,
                 "namespace": namespace,
-                "threat_id": "FORMAL-K8S007",
+                "threat_id": "T10",
                 "category": "Formal (K8s Config)",
                 "description": f"Container {container_name} has writable root filesystem",
                 "severity": "Medium",
@@ -235,7 +235,7 @@ def _analyze_pod_security(pod):
                 threats.append({
                     "pod": pod_name,
                     "namespace": namespace,
-                    "threat_id": "FORMAL-K8S008",
+                    "threat_id": "T10",
                     "category": "Formal (K8s Config)",
                     "description": f"Hardcoded secret in environment variable {env_name}",
                     "severity": "Critical",
@@ -269,7 +269,7 @@ def _analyze_rbac_security(rbac_data):
                     "binding": binding_name,
                     "namespace": namespace,
                     "subject": f"{subject.get('kind', 'Unknown')}/{subject.get('name', 'unknown')}",
-                    "threat_id": "FORMAL-RBAC001",
+                    "threat_id": "T02",
                     "category": "Formal (RBAC)",
                     "description": f"cluster-admin role bound in namespace {namespace} to {subject.get('name')}",
                     "severity": "Critical",
@@ -298,7 +298,7 @@ def _analyze_rbac_security(rbac_data):
                                     "binding": binding_name,
                                     "namespace": namespace,
                                     "subject": f"ServiceAccount/{sa_name}",
-                                    "threat_id": "FORMAL-RBAC002",
+                                    "threat_id": "T06",
                                     "category": "Formal (RBAC)",
                                     "description": f"ServiceAccount {sa_name} has broad secret access",
                                     "severity": "High",
@@ -319,7 +319,7 @@ def _analyze_rbac_security(rbac_data):
                             "binding": binding_name,
                             "namespace": namespace,
                             "subject": f"ServiceAccount/{sa_name}",
-                            "threat_id": "FORMAL-RBAC003",
+                            "threat_id": "T06",
                             "category": "Formal (RBAC)",
                             "description": f"ServiceAccount {sa_name} can exec into pods",
                             "severity": "High",
@@ -338,7 +338,7 @@ def _analyze_rbac_security(rbac_data):
                         "binding": binding_name,
                         "namespace": namespace,
                         "subject": f"{subject.get('kind')}/{subject.get('name')}",
-                        "threat_id": "FORMAL-RBAC004",
+                        "threat_id": "T02",
                         "category": "Formal (RBAC)",
                         "description": f"Wildcard permissions (*/*) granted to {subject.get('name')}",
                         "severity": "Critical",
@@ -349,6 +349,67 @@ def _analyze_rbac_security(rbac_data):
                         "cwe": "CWE-269",
                         "k8s_threat_matrix": "Excessive Permissions"
                     })
+
+        # T12: Training Data Poisoning - CI/CD access to training data
+        # Detect Jenkins (cicd-zone) having access to dev-zone (where training data is)
+        for subject in subjects:
+            subject_ns = subject.get("namespace", "")
+            subject_name = subject.get("name", "")
+
+            if "jenkins" in subject_name.lower() and subject_ns == "cicd-zone":
+                # Check if this grants access to dev-zone
+                if namespace == "dev-zone" and role in ["edit", "admin", "cluster-admin"]:
+                    threats.append({
+                        "binding": binding_name,
+                        "namespace": namespace,
+                        "subject": f"{subject.get('kind')}/{subject_name}",
+                        "subject_namespace": subject_ns,
+                        "threat_id": "T12",
+                        "category": "ML Supply Chain",
+                        "description": f"CI/CD service (Jenkins) from {subject_ns} has {role} access to training data in {namespace}",
+                        "severity": "High",
+                        "evidence": f"Cross-zone RBAC: Jenkins can modify resources in dev-zone including training data",
+                        "mitigation": "Restrict CI/CD write access to training data; use read-only service accounts",
+                        "detection_method": "Static Analysis (RBAC)",
+                        "cwe": "CWE-732",
+                        "ml_threat": "Training Data Poisoning"
+                    })
+
+        # T15: Cross-Zone ML Deployment RBAC
+        # Detect Jenkins (cicd-zone) having deployment access to prod-zone
+        for subject in subjects:
+            subject_ns = subject.get("namespace", "")
+            subject_name = subject.get("name", "")
+
+            if "jenkins" in subject_name.lower() and subject_ns == "cicd-zone":
+                # Check if this grants deployment access to prod-zone
+                if namespace == "prod-zone" and role in ["edit", "admin", "cluster-admin"]:
+                    # Check if permissions include deployment/create (ML deployment capability)
+                    can_deploy = False
+                    for perm in permissions:
+                        resources = perm.get("resources", [])
+                        verbs = perm.get("verbs", [])
+                        if any(r in resources for r in ["deployments", "pods", "*"]) and \
+                           any(v in verbs for v in ["create", "update", "patch", "*"]):
+                            can_deploy = True
+                            break
+
+                    if can_deploy or role in ["edit", "admin", "cluster-admin"]:  # These roles include deployment rights
+                        threats.append({
+                            "binding": binding_name,
+                            "namespace": namespace,
+                            "subject": f"{subject.get('kind')}/{subject_name}",
+                            "subject_namespace": subject_ns,
+                            "threat_id": "T15",
+                            "category": "ML Supply Chain",
+                            "description": f"CI/CD service (Jenkins) from {subject_ns} can deploy ML models to production ({namespace})",
+                            "severity": "High",
+                            "evidence": f"Cross-zone RBAC: {role_kind}/{role} in {namespace} bound to ServiceAccount from {subject_ns}",
+                            "mitigation": "Use GitOps with approval gates; restrict direct CI/CD deployment to production",
+                            "detection_method": "Static Analysis (RBAC)",
+                            "cwe": "CWE-732",
+                            "ml_threat": "Cross-Zone ML Deployment Without Approval"
+                        })
 
     return threats
 
@@ -409,7 +470,7 @@ def _analyze_services(services):
             threats.append({
                 "service": svc_name,
                 "namespace": namespace,
-                "threat_id": "FORMAL-SVC001",
+                "threat_id": "T01",
                 "category": "Formal (Service Config)",
                 "description": f"Service {svc_name} exposed via LoadBalancer without authentication",
                 "severity": "High",
@@ -426,7 +487,7 @@ def _analyze_services(services):
             threats.append({
                 "service": svc_name,
                 "namespace": namespace,
-                "threat_id": "FORMAL-SVC001",
+                "threat_id": "T01",
                 "category": "Formal (Service Config)",
                 "description": f"Service {svc_name} exposed via NodePort",
                 "severity": "Medium",
@@ -470,7 +531,7 @@ def _analyze_unencrypted_services(services):
                 threats.append({
                     "service": svc_name,
                     "namespace": namespace,
-                    "threat_id": "FORMAL-SVC002",
+                    "threat_id": "T03",
                     "category": "Formal (Service Config)",
                     "description": f"Service {svc_name} uses unencrypted HTTP on port {port_num}",
                     "severity": "Medium",
@@ -511,7 +572,7 @@ def _detect_secrets_in_configmaps(configmaps):
                 threats.append({
                     "configmap": cm_name,
                     "namespace": namespace,
-                    "threat_id": "FORMAL-CFG002",
+                    "threat_id": "T08",
                     "category": "Formal (ConfigMap)",
                     "description": f"ConfigMap {cm_name} contains secret '{key}' in plaintext",
                     "severity": "Critical",
@@ -553,7 +614,7 @@ def _detect_missing_network_policies(namespaces, network_policies):
         if ns_name not in namespaces_with_policies:
             threats.append({
                 "namespace": ns_name,
-                "threat_id": "FORMAL-NET001",
+                "threat_id": "T04",
                 "category": "Formal (Network Policy)",
                 "description": f"Namespace {ns_name} has no NetworkPolicies (unrestricted network access)",
                 "severity": "High",
@@ -588,7 +649,7 @@ def _detect_missing_audit_logging(namespaces):
         if annotations.get('audit.k8s.io/enabled') == 'false':
             threats.append({
                 "namespace": ns_name,
-                "threat_id": "FORMAL-AUD001",
+                "threat_id": "T07",
                 "category": "Formal (Audit Policy)",
                 "description": f"Namespace {ns_name} has audit logging disabled",
                 "severity": "Medium",
@@ -642,7 +703,7 @@ def _detect_registry_misconfig(pods, configmaps):
                         "pod": pod_name,
                         "namespace": namespace,
                         "configmap": cm.get('name'),
-                        "threat_id": "FORMAL-CFG001",
+                        "threat_id": "T05",
                         "category": "Formal (ConfigMap)",
                         "description": f"Registry {pod_name} has no authentication configured",
                         "severity": "Critical",
@@ -659,7 +720,7 @@ def _detect_registry_misconfig(pods, configmaps):
                     "pod": pod_name,
                     "namespace": namespace,
                     "configmap": cm.get('name'),
-                    "threat_id": "FORMAL-CFG001",
+                    "threat_id": "T05",
                     "category": "Formal (ConfigMap)",
                     "description": f"Registry {pod_name} has no authentication configured",
                     "severity": "Critical",
@@ -700,7 +761,7 @@ def _detect_gitea_misconfig(configmaps):
                 threats.append({
                     "configmap": cm_name,
                     "namespace": namespace,
-                    "threat_id": "FORMAL-CFG003",
+                    "threat_id": "T09",
                     "category": "Formal (ConfigMap)",
                     "description": f"Gitea allows anonymous repository access (REQUIRE_SIGNIN_VIEW=false)",
                     "severity": "Medium",

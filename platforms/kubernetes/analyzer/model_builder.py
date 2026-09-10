@@ -1,7 +1,7 @@
 from collections import defaultdict
 from utils import sanitize_name
 
-def build_pytm_model(pods, flows, scan_results, falco_threats=None, correlated_threats=None, ml_threats=None, lateral_threats=None, egress_threats=None):
+def build_pytm_model(pods, flows, scan_results, falco_threats=None, correlated_threats=None, ml_threats=None, k8s_config_threats=None, lateral_threats=None, egress_threats=None):
     """
     Build PyTM threat model integrating correlated and empirical threats.
 

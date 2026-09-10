@@ -13,18 +13,19 @@ NEW ARCHITECTURE:
 from data_loader import load_data
 from port_scanner import detect_port_scanning
 from falco_threat_detector import detect_falco_runtime_threats, get_falco_threat_summary
-from ml_threat_detector import detect_ml_threats, get_ml_threat_summary  # NEW: ML-specific only
 from lateral_movement_detector import detect_lateral_movement, detect_unusual_external_connections, get_lateral_movement_summary
 from model_builder import build_pytm_model
 from dfd_generator import generate_dfd_text
 from tool_integrator import integrate_security_tools
+from k8s_config_threat_detector import detect_k8s_config_threats  # K8s config analysis
 from threat_correlator import correlate_threats  # NEW: Correlation layer
 import json
 import sys
 from pathlib import Path
 
-# Add common path for MetricsCollector
+# Add common path for shared modules
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "common"))
+from ml_threat_detector import detect_ml_threats  # Platform-agnostic ML detector
 try:
     from metrics_collector import MetricsCollector, extract_threat_ids
     METRICS_AVAILABLE = True
@@ -106,11 +107,44 @@ def main():
     print()
 
     print("   [ML Config] Analyzing MLflow, model access, and provenance...")
-    ml_threats = detect_ml_threats(pods, services, configmaps)
-    ml_summary = get_ml_threat_summary(ml_threats)
+    # Use platform-agnostic ML detector
+    ml_threats = detect_ml_threats('kubernetes', {
+        'pods': pods,
+        'services': services,
+        'configmaps': configmaps
+    })
+
+    # Calculate summary inline
+    high_count = sum(1 for t in ml_threats if t.get('severity') == 'High')
+    medium_count = sum(1 for t in ml_threats if t.get('severity') == 'Medium')
+
     print(f"   ✅ Found {len(ml_threats)} ML-specific threats")
-    if ml_summary["total"] > 0:
-        print(f"      High: {ml_summary['high_count']}, Medium: {ml_summary['medium_count']}")
+    if len(ml_threats) > 0:
+        print(f"      High: {high_count}, Medium: {medium_count}")
+    print()
+
+    # =========================================================================
+    # K8S CONFIG THREAT DETECTION (Application-Level Config)
+    # =========================================================================
+    print("🔍 K8S CONFIG ANALYSIS: Detecting application-level configuration threats...")
+    print()
+
+    print("   [K8s Config] Analyzing pod specs, RBAC, services, and ConfigMaps...")
+    k8s_config_threats = detect_k8s_config_threats(
+        pods=pods,
+        rbac_data=rbac,
+        services=services,
+        configmaps=configmaps,
+        network_policies=network_policies,
+        namespaces=namespaces
+    )
+
+    config_high = sum(1 for t in k8s_config_threats if t.get('severity') in ['Critical', 'High'])
+    config_medium = sum(1 for t in k8s_config_threats if t.get('severity') == 'Medium')
+
+    print(f"   ✅ Found {len(k8s_config_threats)} config threats")
+    if len(k8s_config_threats) > 0:
+        print(f"      Critical/High: {config_high}, Medium: {config_medium}")
     print()
 
     # =========================================================================
@@ -168,6 +202,7 @@ def main():
         falco_threats=falco_threats,
         correlated_threats=correlated_threats,  # NEW: Use correlated threats
         ml_threats=ml_threats,  # ML-specific threats
+        k8s_config_threats=k8s_config_threats,  # K8s config threats
         lateral_threats=lateral_threats,
         egress_threats=egress_threats
     )
@@ -190,7 +225,7 @@ def main():
     print("📊 Generating threat summary report...")
 
     total_empirical = len(falco_threats) + len(scan_results) + len(lateral_threats) + len(egress_threats)
-    total_static = len(ml_threats)  # ML-specific static threats
+    total_static = len(ml_threats) + len(k8s_config_threats)  # ML + config static threats
     total_correlated = len(correlated_threats)
     total_threats = total_empirical + total_static + total_correlated
 
@@ -206,6 +241,10 @@ def main():
         "ml_specific_threats": {
             "total": len(ml_threats),
             "threats": ml_threats
+        },
+        "k8s_config_threats": {
+            "total": len(k8s_config_threats),
+            "threats": k8s_config_threats
         },
         "empirical_threats": {
             "total": total_empirical,
@@ -234,7 +273,6 @@ def main():
             "static_detection_rate": f"{(total_static / total_threats * 100):.1f}%" if total_threats > 0 else "0%",
             "empirical_detection_rate": f"{(total_empirical / total_threats * 100):.1f}%" if total_threats > 0 else "0%",
             "correlation_confirmation_rate": f"{(confirmed_count / total_correlated * 100):.1f}%" if total_correlated > 0 else "0%",
-            "llm_threats_available": llm_analysis is not None,
             "ground_truth_detection_rate": f"{tool_results.get('combined_detection_rate', 0)*100:.1f}%"
         }
     }
@@ -356,6 +394,7 @@ def main():
         all_threats.extend(falco_threats)
         all_threats.extend(correlated_threats)
         all_threats.extend(ml_threats)
+        all_threats.extend(k8s_config_threats)
         all_threats.extend(lateral_threats)
         all_threats.extend(egress_threats)
 
@@ -509,8 +548,9 @@ def main():
     print(f"  └─ RUNTIME ONLY:               {runtime_only_count:3d}")
     print()
 
-    print(f"ML-SPECIFIC (Domain Threats):   {total_static:3d}  ({static_pct:.1f}%)")
-    print(f"  └─ T11-T17 Application Layer:  {len(ml_threats):3d}")
+    print(f"STATIC ANALYSIS (Config + ML):  {total_static:3d}  ({static_pct:.1f}%)")
+    print(f"  ├─ K8s Config Threats:        {len(k8s_config_threats):3d}")
+    print(f"  └─ ML-Specific (T11-T17):     {len(ml_threats):3d}")
     print()
 
     print(f"EMPIRICAL (Runtime Analysis):   {total_empirical:3d}  ({empirical_pct:.1f}%)")

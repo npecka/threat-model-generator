@@ -2,12 +2,18 @@
 """
 AWS Tool Integrator
 Integrates Prowler and Checkov for AWS cloud threat detection
+PLUS platform-agnostic ML threat detector for T11-T17
 """
 
 import json
 import subprocess
 import shutil
+import sys
 from pathlib import Path
+
+# Add parent path for common modules
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from common.ml_threat_detector import detect_ml_threats
 
 
 class AWSToolIntegrator:
@@ -39,13 +45,18 @@ class AWSToolIntegrator:
         results["tools"]["prowler"] = prowler_results
 
         # Run Checkov on Terraform files (Static IaC analysis)
-        print("\n[2/2] Running Checkov on Terraform configs...")
+        print("\n[2/3] Running Checkov on Terraform configs...")
         checkov_results = self.run_checkov(metadata)
         results["tools"]["checkov"] = checkov_results
 
+        # Run ML threat detector for T11-T17
+        print("\n[3/3] Running platform-agnostic ML threat detector...")
+        ml_results = self.run_ml_detector(metadata)
+        results["tools"]["ml_detector"] = ml_results
+
         # Combine detections
         results["combined_detection"] = self._combine_detections(
-            prowler_results, checkov_results
+            prowler_results, checkov_results, ml_results
         )
 
         # Calculate detection rates
@@ -576,12 +587,54 @@ class AWSToolIntegrator:
 
         return results
 
-    def _combine_detections(self, prowler, checkov):
+    def run_ml_detector(self, metadata):
+        """
+        Run platform-agnostic ML threat detector for T11-T17
+
+        CRITICAL: Without this, AWS deployments CANNOT detect ML-specific threats,
+        which invalidates the platform-agnostic research claim.
+        """
+        results = {
+            "tool": "ml_detector",
+            "total_findings": 0,
+            "detected_ground_truth": [],
+            "findings": []
+        }
+
+        try:
+            # Call the platform-agnostic ML detector
+            ml_threats = detect_ml_threats('aws', metadata)
+
+            results["total_findings"] = len(ml_threats)
+            results["findings"] = ml_threats
+
+            # Extract detected threat IDs
+            detected_ids = set()
+            for threat in ml_threats:
+                threat_id = threat.get('threat_id', '')
+                if threat_id:
+                    detected_ids.add(threat_id)
+
+            results["detected_ground_truth"] = sorted(list(detected_ids))
+
+            print(f"   ✅ ML Detector: {len(detected_ids)} threat types detected (T11-T17 coverage)")
+
+        except Exception as e:
+            print(f"   ⚠️  ML Detector error: {e}")
+            import traceback
+            traceback.print_exc()
+
+        return results
+
+    def _combine_detections(self, prowler, checkov, ml_detector=None):
         """Combine detections from all tools"""
         combined = set()
 
         combined.update(prowler.get("detected_ground_truth", []))
         combined.update(checkov.get("detected_ground_truth", []))
+
+        if ml_detector:
+            combined.update(ml_detector.get("detected_ground_truth", []))
 
         return sorted(list(combined))
 
