@@ -186,6 +186,8 @@ The framework detects 17 architectural threat types:
 
 ## Key Results
 
+See [RESULTS.md](RESULTS.md) for the run and file behind each number below.
+
 ### Detection Accuracy
 
 | Platform | CS1 Threat Types | CS1 Instances | CS2 Threat Types | CS2 Instances |

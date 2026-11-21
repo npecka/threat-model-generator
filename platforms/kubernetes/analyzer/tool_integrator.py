@@ -215,7 +215,7 @@ class SecurityToolIntegrator:
 
         # Build command - use full path if kubescape not in PATH
         import shutil
-        kubescape_path = shutil.which('kubescape') or '~/.kubescape/bin/kubescape'
+        kubescape_path = shutil.which('kubescape') or str(Path.home() / '.kubescape' / 'bin' / 'kubescape')
 
         cmd = [
             kubescape_path, 'scan',

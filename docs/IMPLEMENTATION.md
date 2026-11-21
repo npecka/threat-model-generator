@@ -301,7 +301,7 @@ Create a table showing:
 If you get import errors, make sure you're in the correct directory:
 
 ```bash
-cd osd-mapper
+cd threat-model-generator
 python k8s_threat_model/main.py
 ```
 

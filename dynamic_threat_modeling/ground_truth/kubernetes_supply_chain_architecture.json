@@ -1,7 +1,7 @@
 {
   "platform": "kubernetes",
   "description": "ML-enhanced software supply chain ground truth architecture",
-  "generated_from": "k8s-threat-model-generator/dynamic_threat_modeling/kubernetes/supply_chain",
+  "generated_from": "dynamic_threat_modeling/kubernetes/supply_chain",
   "components": [
     "application",
     "gitea",
